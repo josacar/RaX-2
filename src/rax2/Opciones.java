@@ -88,26 +88,25 @@ public class Opciones extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(rax2.RaX2App.class).getContext().getResourceMap(Opciones.class);
-        setTitle(resourceMap.getString("Form.title")); // NOI18N
+        setTitle("Options"); // NOI18N
         setName("Form"); // NOI18N
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel1.setName("jPanel1"); // NOI18N
 
-        jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
+        jLabel1.setText("User"); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
 
-        jTextFieldRpcUser.setText(resourceMap.getString("jTextFieldRpcUser.text")); // NOI18N
+        jTextFieldRpcUser.setText("rssani-rpc"); // NOI18N
         jTextFieldRpcUser.setName("jTextFieldRpcUser"); // NOI18N
 
-        jLabel2.setText(resourceMap.getString("jLabel2.text")); // NOI18N
+        jLabel2.setText("Password"); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
 
-        jTextFieldRpcPass.setText(resourceMap.getString("jTextFieldRpcPass.text")); // NOI18N
+        jTextFieldRpcPass.setText("rssanipass-rpc"); // NOI18N
         jTextFieldRpcPass.setName("jTextFieldRpcPass"); // NOI18N
 
-        jButtonModificar.setText(resourceMap.getString("jButtonModificar.text")); // NOI18N
+        jButtonModificar.setText("Update credentials"); // NOI18N
         jButtonModificar.setName("jButtonModificar"); // NOI18N
         jButtonModificar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -115,7 +114,7 @@ public class Opciones extends javax.swing.JFrame {
             }
         });
 
-        jButtonSaveAuth.setText(resourceMap.getString("jButtonSaveAuth.text")); // NOI18N
+        jButtonSaveAuth.setText("Save credentials"); // NOI18N
         jButtonSaveAuth.setName("jButtonSaveAuth"); // NOI18N
         jButtonSaveAuth.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -162,7 +161,7 @@ public class Opciones extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jButtonCancelar.setText(resourceMap.getString("jButtonCancelar.text")); // NOI18N
+        jButtonCancelar.setText("Cancel"); // NOI18N
         jButtonCancelar.setName("jButtonCancelar"); // NOI18N
         jButtonCancelar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -170,7 +169,7 @@ public class Opciones extends javax.swing.JFrame {
             }
         });
 
-        jButtonAceptar.setText(resourceMap.getString("jButtonAceptar.text")); // NOI18N
+        jButtonAceptar.setText("Accept"); // NOI18N
         jButtonAceptar.setName("jButtonAceptar"); // NOI18N
         jButtonAceptar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -181,22 +180,22 @@ public class Opciones extends javax.swing.JFrame {
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel2.setName("jPanel2"); // NOI18N
 
-        jLabel5.setText(resourceMap.getString("jLabel5.text")); // NOI18N
+        jLabel5.setText("Torrents path:"); // NOI18N
         jLabel5.setName("jLabel5"); // NOI18N
 
-        jTextFieldRuta.setText(resourceMap.getString("jTextFieldRuta.text")); // NOI18N
+        jTextFieldRuta.setText(""); // NOI18N
         jTextFieldRuta.setName("jTextFieldRuta"); // NOI18N
 
-        jTextFieldMailFrom.setText(resourceMap.getString("jTextFieldMailFrom.text")); // NOI18N
+        jTextFieldMailFrom.setText(""); // NOI18N
         jTextFieldMailFrom.setName("jTextFieldMailFrom"); // NOI18N
 
-        jLabel6.setText(resourceMap.getString("jLabel6.text")); // NOI18N
+        jLabel6.setText("Mail from:"); // NOI18N
         jLabel6.setName("jLabel6"); // NOI18N
 
-        jTextFieldMailTo.setText(resourceMap.getString("jTextFieldMailTo.text")); // NOI18N
+        jTextFieldMailTo.setText(""); // NOI18N
         jTextFieldMailTo.setName("jTextFieldMailTo"); // NOI18N
 
-        jLabel7.setText(resourceMap.getString("jLabel7.text")); // NOI18N
+        jLabel7.setText("Mail to"); // NOI18N
         jLabel7.setName("jLabel7"); // NOI18N
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);

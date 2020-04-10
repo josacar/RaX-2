@@ -6,13 +6,10 @@
 package rax2;
 
 import java.awt.Component;
-import java.awt.Point;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -170,8 +167,7 @@ public class Log extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jTree1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(rax2.RaX2App.class).getContext().getResourceMap(Log.class);
-        setTitle(resourceMap.getString("Form.title")); // NOI18N
+        setTitle("Log"); // NOI18N
         setName("Form"); // NOI18N
 
         jScrollPaneLog.setName("jScrollPaneLog"); // NOI18N
@@ -202,10 +198,10 @@ public class Log extends javax.swing.JFrame {
             jTable1.setDefaultRenderer(Date.class, new DateRenderer() );
             jScrollPaneLog.setViewportView(jTable1);
 
-            jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
+            jLabel1.setText("Filter:"); // NOI18N
             jLabel1.setName("jLabel1"); // NOI18N
 
-            jTextFieldFiltro.setText(resourceMap.getString("jTextFieldFiltro.text")); // NOI18N
+            jTextFieldFiltro.setText(""); // NOI18N
             jTextFieldFiltro.setName("jTextFieldFiltro"); // NOI18N
 
             javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

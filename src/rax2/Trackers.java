@@ -25,16 +25,17 @@ public class Trackers extends javax.swing.JFrame {
     private XmlRpcClient _client;
     private DefaultTableModel model;
 
-    /** Creates new form Trackers */
+    /** Creates new form Trackers
+     * @param client */
     public Trackers(XmlRpcClient client) {
         initComponents();
         tablaRegexp.getColumnModel().getColumn(1).setMinWidth(60);
         tablaRegexp.getColumnModel().getColumn(1).setMaxWidth(60);
         _client = client;
+        HashMap struct;
 
         try {
             Object[] params = new Object[]{};
-            HashMap struct = new HashMap();
 
             Object[] result = (Object[]) _client.execute("rssani.listaAuths", params);
 
@@ -70,8 +71,7 @@ public class Trackers extends javax.swing.JFrame {
         jButtonBorrar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(rax2.RaX2App.class).getContext().getResourceMap(Trackers.class);
-        setTitle(resourceMap.getString("Form.title")); // NOI18N
+        setTitle("Trackers"); // NOI18N
         setName("Form"); // NOI18N
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
@@ -106,7 +106,7 @@ public class Trackers extends javax.swing.JFrame {
         tablaRegexp.setShowVerticalLines(false);
         jScrollPane1.setViewportView(tablaRegexp);
 
-        jButtonAnadir.setText(resourceMap.getString("jButtonAnadir.text")); // NOI18N
+        jButtonAnadir.setText("Add"); // NOI18N
         jButtonAnadir.setName("jButtonAnadir"); // NOI18N
         jButtonAnadir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -114,7 +114,7 @@ public class Trackers extends javax.swing.JFrame {
             }
         });
 
-        jButtonBorrar.setText(resourceMap.getString("jButtonBorrar.text")); // NOI18N
+        jButtonBorrar.setText("Remove"); // NOI18N
         jButtonBorrar.setName("jButtonBorrar"); // NOI18N
         jButtonBorrar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

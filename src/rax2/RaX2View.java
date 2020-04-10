@@ -4,6 +4,7 @@
 package rax2;
 
 import java.awt.AWTException;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.MenuItem;
@@ -13,8 +14,6 @@ import java.awt.SystemTray;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileInputStream;
-import org.jdesktop.application.SingleFrameApplication;
-import org.jdesktop.application.FrameView;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -44,11 +43,17 @@ import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 
 /**
  * The application's main frame.
  */
-public class RaX2View extends FrameView {
+public class RaX2View extends javax.swing.JFrame {
 
     XmlRpcClientConfigImpl config;
     XmlRpcClient client;
@@ -61,7 +66,6 @@ public class RaX2View extends FrameView {
     Log log;
     Vector <String>trackers;
     TrayIcon trayIcon;
-    final JFrame aplicacion;
 
     class MyWindowListener implements WindowListener {
 
@@ -79,7 +83,7 @@ public class RaX2View extends FrameView {
 
         @Override
         public void windowIconified(WindowEvent arg0) {
-            getFrame().setVisible(false);
+            hideApplication();
         }
 
         @Override
@@ -123,11 +127,9 @@ public class RaX2View extends FrameView {
     }
 
     private void creaPopup() {
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(rax2.RaX2App.class).getContext().getResourceMap(RaX2View.class);
-
         JPopupMenu popupMenu = new JPopupMenu();
 
-        JMenuItem copyMenuItem = new JMenuItem("Copiar",resourceMap.getIcon("jButtonCopy.icon"));
+        JMenuItem copyMenuItem = new JMenuItem("Copiar",new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit-copy.png")));
         copyMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -140,7 +142,7 @@ public class RaX2View extends FrameView {
 
         popupMenu.addSeparator();
 
-        JMenuItem editMenuItem = new JMenuItem("Editar", resourceMap.getIcon("jButtonEdit.icon"));
+        JMenuItem editMenuItem = new JMenuItem("Editar", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit.png")));
         editMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -150,7 +152,7 @@ public class RaX2View extends FrameView {
         });
         popupMenu.add(editMenuItem);
 
-        JMenuItem delMenuItem = new JMenuItem("Borrar", resourceMap.getIcon("jButtonRemove.icon"));
+        JMenuItem delMenuItem = new JMenuItem("Borrar", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_remove.png")));
         delMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -160,7 +162,7 @@ public class RaX2View extends FrameView {
         });
         popupMenu.add(delMenuItem);
 
-        JMenuItem actdesMenuItem = new JMenuItem("Act/Des", resourceMap.getIcon("jButtonActDes.icon"));
+        JMenuItem actdesMenuItem = new JMenuItem("Act/Des", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/actdes.png")));
         actdesMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -176,11 +178,10 @@ public class RaX2View extends FrameView {
 
     }
 
-    public RaX2View(SingleFrameApplication app) {
-        super(app);
-        aplicacion = getFrame();
-        getFrame().setTitle(getFrame().getTitle() + ' ' + version);
-        getFrame().setMinimumSize(new Dimension(600, 470));
+    public RaX2View() {
+        super();
+        this.setTitle(getTitle() + ' ' + version);
+        this.setMinimumSize(new Dimension(600, 470));
         FileInputStream f = null;
         config = new XmlRpcClientConfigImpl();
         client = new XmlRpcClient();
@@ -204,10 +205,22 @@ public class RaX2View extends FrameView {
         jComboBoxIP.setSelectedItem(propiedades.get("lastItem", ""));
 
         crearBandeja();
-        app.getMainFrame().addWindowListener(new MyWindowListener());
-        getFrame().addWindowListener(new MyWindowListener());
+        this.addWindowListener(new MyWindowListener());
+        this.addWindowListener(new MyWindowListener());
 
         creaPopup();
+    }
+
+    private void toggleVisible(){
+      if (!this.isVisible()) {
+          this.setVisible(true);
+      } else {
+          this.setVisible(false);
+      }
+    }
+
+     private void hideApplication(){
+       this.setVisible(false);
     }
 
     private void crearBandeja() {
@@ -234,13 +247,7 @@ public class RaX2View extends FrameView {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     // System.out.println("Tray Icon - Mouse clicked!");
-                    if (e.getButton() == MouseEvent.BUTTON1) {
-                        if (aplicacion.isVisible()) {
-                            aplicacion.setVisible(false);
-                        } else {
-                            aplicacion.setVisible(true);
-                        }
-                    }
+                   toggleVisible();
                 }
 
                 @Override
@@ -266,13 +273,13 @@ public class RaX2View extends FrameView {
 
             SystemTray tray = SystemTray.getSystemTray();
 
-            org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(rax2.RaX2App.class).getContext().getResourceMap(RaX2View.class);
-            Image image = resourceMap.getImageIcon("trayIcon.icon").getImage();
+            Image image = new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/rax2.png")).getImage();
 
             PopupMenu popup = new PopupMenu();
             MenuItem defaultItem = new MenuItem("Exit");
             defaultItem.addActionListener(exitListener);
             popup.add(defaultItem);
+
 
             trayIcon = new TrayIcon(image, "RaX 2", popup);
 
@@ -379,13 +386,13 @@ public class RaX2View extends FrameView {
             estadoBotones(true);
         } catch (XmlRpcException ex) {
             if (ex.code == 0) {
-                JOptionPane.showMessageDialog(getFrame(), "No se pudo conectar a RSSANI", "Error de conexión", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo conectar a RSSANI", "Error de conexión", JOptionPane.ERROR_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(getFrame(), "Error: " + ex.code + " " + ex, "ola?", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error: " + ex.code + " " + ex, "ola?", JOptionPane.ERROR_MESSAGE);
             }
             Desconectar();
         } catch (MalformedURLException ex2) {
-            JOptionPane.showMessageDialog(getFrame(), ex2, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex2, "ola?", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (exito) {
                 return 0;
@@ -446,14 +453,13 @@ public class RaX2View extends FrameView {
 
         mainPanel.setName("mainPanel"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(rax2.RaX2App.class).getContext().getResourceMap(RaX2View.class);
-        jLabel2.setText(resourceMap.getString("jLabel2.text")); // NOI18N
+        jLabel2.setText("IP"); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
 
-        jTextFieldPort.setText(resourceMap.getString("jTextFieldPort.text")); // NOI18N
+        jTextFieldPort.setText(""); // NOI18N
         jTextFieldPort.setName("jTextFieldPort"); // NOI18N
 
-        jLabel3.setText(resourceMap.getString("jLabel3.text")); // NOI18N
+        jLabel3.setText("Port"); // NOI18N
         jLabel3.setName("jLabel3"); // NOI18N
 
         jComboBoxIP.setEditable(true);
@@ -464,8 +470,8 @@ public class RaX2View extends FrameView {
             }
         });
 
-        jButtonAdd.setIcon(resourceMap.getIcon("jButtonAdd.icon")); // NOI18N
-        jButtonAdd.setText(resourceMap.getString("jButtonAdd.text")); // NOI18N
+        jButtonAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_add.png"))); // NOI18N
+        jButtonAdd.setText("Add"); // NOI18N
         jButtonAdd.setEnabled(false);
         jButtonAdd.setMaximumSize(new java.awt.Dimension(77, 26));
         jButtonAdd.setMinimumSize(new java.awt.Dimension(77, 26));
@@ -479,8 +485,8 @@ public class RaX2View extends FrameView {
 
         jSeparator1.setName("jSeparator1"); // NOI18N
 
-        jButtonKill.setIcon(resourceMap.getIcon("jButtonKill.icon")); // NOI18N
-        jButtonKill.setText(resourceMap.getString("jButtonKill.text")); // NOI18N
+        jButtonKill.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/cancel.png"))); // NOI18N
+        jButtonKill.setText("Kill"); // NOI18N
         jButtonKill.setEnabled(false);
         jButtonKill.setName("jButtonKill"); // NOI18N
         jButtonKill.addActionListener(new java.awt.event.ActionListener() {
@@ -490,21 +496,21 @@ public class RaX2View extends FrameView {
         });
 
         jLabelUltimoHora.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelUltimoHora.setText(resourceMap.getString("jLabelUltimoHora.text")); // NOI18N
+        jLabelUltimoHora.setText("N/A"); // NOI18N
         jLabelUltimoHora.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jLabelUltimoHora.setName("jLabelUltimoHora"); // NOI18N
 
         jLabelUltimoFecha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelUltimoFecha.setText(resourceMap.getString("jLabelUltimoFecha.text")); // NOI18N
+        jLabelUltimoFecha.setText("N/A"); // NOI18N
         jLabelUltimoFecha.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jLabelUltimoFecha.setName("jLabelUltimoFecha"); // NOI18N
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText(resourceMap.getString("jLabel4.text")); // NOI18N
+        jLabel4.setText("Last update"); // NOI18N
         jLabel4.setName("jLabel4"); // NOI18N
 
-        jButtonSave.setIcon(resourceMap.getIcon("jButtonSave.icon")); // NOI18N
-        jButtonSave.setText(resourceMap.getString("jButtonSave.text")); // NOI18N
+        jButtonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/filesave.png"))); // NOI18N
+        jButtonSave.setText("Save"); // NOI18N
         jButtonSave.setEnabled(false);
         jButtonSave.setName("jButtonSave"); // NOI18N
         jButtonSave.addActionListener(new java.awt.event.ActionListener() {
@@ -516,8 +522,8 @@ public class RaX2View extends FrameView {
         jPanel2.setName("jPanel2"); // NOI18N
         jPanel2.setLayout(new java.awt.BorderLayout());
 
-        jButtonDown.setIcon(resourceMap.getIcon("jButtonDown.icon")); // NOI18N
-        jButtonDown.setText(resourceMap.getString("jButtonDown.text")); // NOI18N
+        jButtonDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/1downarrow.png"))); // NOI18N
+        jButtonDown.setText(""); // NOI18N
         jButtonDown.setAlignmentX(0.5F);
         jButtonDown.setEnabled(false);
         jButtonDown.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -532,8 +538,8 @@ public class RaX2View extends FrameView {
         });
         jPanel2.add(jButtonDown, java.awt.BorderLayout.WEST);
 
-        jButtonUp.setIcon(resourceMap.getIcon("jButtonUp.icon")); // NOI18N
-        jButtonUp.setText(resourceMap.getString("jButtonUp.text")); // NOI18N
+        jButtonUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/1uparrow.png"))); // NOI18N
+        jButtonUp.setText(""); // NOI18N
         jButtonUp.setAlignmentX(0.5F);
         jButtonUp.setEnabled(false);
         jButtonUp.setMaximumSize(new java.awt.Dimension(60, 26));
@@ -548,8 +554,8 @@ public class RaX2View extends FrameView {
         });
         jPanel2.add(jButtonUp, java.awt.BorderLayout.EAST);
 
-        jButtonLog.setIcon(resourceMap.getIcon("jButtonLog.icon")); // NOI18N
-        jButtonLog.setText(resourceMap.getString("jButtonLog.text")); // NOI18N
+        jButtonLog.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/openterm.png"))); // NOI18N
+        jButtonLog.setText("Log"); // NOI18N
         jButtonLog.setEnabled(false);
         jButtonLog.setName("jButtonLog"); // NOI18N
         jButtonLog.addActionListener(new java.awt.event.ActionListener() {
@@ -604,8 +610,8 @@ public class RaX2View extends FrameView {
         jTable1.setShowVerticalLines(false);
         jScrollPane1.setViewportView(jTable1);
 
-        jButtonOpciones.setIcon(resourceMap.getIcon("jButtonOpciones.icon")); // NOI18N
-        jButtonOpciones.setText(resourceMap.getString("jButtonOpciones.text")); // NOI18N
+        jButtonOpciones.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/configure.png"))); // NOI18N
+        jButtonOpciones.setText("Settings"); // NOI18N
         jButtonOpciones.setName("jButtonOpciones"); // NOI18N
         jButtonOpciones.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -618,18 +624,18 @@ public class RaX2View extends FrameView {
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
+        jLabel1.setText("Timer:"); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
         jPanel1.add(jLabel1, new java.awt.GridBagConstraints());
 
         jLabelTimer.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelTimer.setText(resourceMap.getString("jLabelTimer.text")); // NOI18N
+        jLabelTimer.setText("N/A"); // NOI18N
         jLabelTimer.setName("jLabelTimer"); // NOI18N
         jLabelTimer.setPreferredSize(new java.awt.Dimension(72, 18));
         jPanel1.add(jLabelTimer, new java.awt.GridBagConstraints());
 
-        jToggleButtonConnect.setIcon(resourceMap.getIcon("jToggleButtonConnect.icon")); // NOI18N
-        jToggleButtonConnect.setText(resourceMap.getString("jToggleButtonConnect.text")); // NOI18N
+        jToggleButtonConnect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/connect_creating.png"))); // NOI18N
+        jToggleButtonConnect.setText("Connect"); // NOI18N
         jToggleButtonConnect.setName("jToggleButtonConnect"); // NOI18N
         jToggleButtonConnect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -637,14 +643,14 @@ public class RaX2View extends FrameView {
             }
         });
 
-        jLabel5.setText(resourceMap.getString("jLabel5.text")); // NOI18N
+        jLabel5.setText("Filter:"); // NOI18N
         jLabel5.setName("jLabel5"); // NOI18N
 
         jTextFieldFiltro.setEditable(false);
         jTextFieldFiltro.setName("jTextFieldFiltro"); // NOI18N
 
-        jButtonBorrarHost.setIcon(resourceMap.getIcon("jButtonBorrarHost.icon")); // NOI18N
-        jButtonBorrarHost.setText(resourceMap.getString("jButtonBorrarHost.text")); // NOI18N
+        jButtonBorrarHost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_remove.png"))); // NOI18N
+        jButtonBorrarHost.setText("Borrar"); // NOI18N
         jButtonBorrarHost.setName("jButtonBorrarHost"); // NOI18N
         jButtonBorrarHost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -652,8 +658,8 @@ public class RaX2View extends FrameView {
             }
         });
 
-        jButtonTrackers.setIcon(resourceMap.getIcon("jButtonTrackers.icon")); // NOI18N
-        jButtonTrackers.setText(resourceMap.getString("jButtonTrackers.text")); // NOI18N
+        jButtonTrackers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/configure.png"))); // NOI18N
+        jButtonTrackers.setText("Trackers"); // NOI18N
         jButtonTrackers.setEnabled(false);
         jButtonTrackers.setName("jButtonTrackers"); // NOI18N
         jButtonTrackers.addActionListener(new java.awt.event.ActionListener() {
@@ -773,7 +779,8 @@ public class RaX2View extends FrameView {
             }
         });
 
-        setComponent(mainPanel);
+        getContentPane().add(mainPanel);
+        pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonKillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonKillActionPerformed
@@ -784,7 +791,7 @@ public class RaX2View extends FrameView {
         }
 
         // Preguntamos como tito bill
-        int si = JOptionPane.showConfirmDialog(getFrame(), "¿Esta seguro de matar rssani?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+        int si = JOptionPane.showConfirmDialog(this, "¿Esta seguro de matar rssani?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
         if (si == 1) {
             return;
         }
@@ -795,10 +802,10 @@ public class RaX2View extends FrameView {
             result = (Boolean) client.execute("rssani.shutdown", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(getFrame(), "No se pudo detener", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo detener", "Error", JOptionPane.WARNING_MESSAGE);
             }
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola2?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola2?", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (result) {
                 jToggleButtonConnect.setSelected(false);
@@ -817,10 +824,10 @@ public class RaX2View extends FrameView {
             Boolean result = (Boolean) client.execute("rssani.guardar", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(getFrame(), "No se pudo guardar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo guardar", "Error", JOptionPane.WARNING_MESSAGE);
             }
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
@@ -855,13 +862,13 @@ public class RaX2View extends FrameView {
             Boolean result = (Boolean) client.execute("rssani.editarRegexpI", params);
 
             if (result) {
-                JOptionPane.showMessageDialog(getFrame(), "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar(); // Refrescamos desde el servidor
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -889,13 +896,13 @@ public class RaX2View extends FrameView {
             Boolean result = (Boolean) client.execute("rssani.activarRegexp", params);
 
             if (result) {
-                JOptionPane.showMessageDialog(getFrame(), "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar(); // Refrescamos desde el servidor
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -918,12 +925,12 @@ public class RaX2View extends FrameView {
         }
 
         // Dialogo para solo mail
-        int mail = JOptionPane.showConfirmDialog(this.getFrame(), "¿Solo mail?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+        int mail = JOptionPane.showConfirmDialog(this, "¿Solo mail?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
 
         boolean bmail = mail == 0 ? true : false;
 
         // Dialogo para el tracker
-        String tracker = (String) JOptionPane.showInputDialog(this.getFrame(), "Introduce el tracker (solo el host)", "titulo", JOptionPane.DEFAULT_OPTION, null, trackers.toArray(), null);
+        String tracker = (String) JOptionPane.showInputDialog(this, "Introduce el tracker (solo el host)", "titulo", JOptionPane.DEFAULT_OPTION, null, trackers.toArray(), null);
         if (tracker == null) {
             return;
         }
@@ -948,7 +955,7 @@ public class RaX2View extends FrameView {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonAddActionPerformed
 
@@ -964,13 +971,13 @@ public class RaX2View extends FrameView {
             Boolean result = (Boolean) client.execute("rssani.moverRegexp", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(getFrame(), "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar();
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonUpActionPerformed
 
@@ -986,13 +993,13 @@ public class RaX2View extends FrameView {
             Boolean result = (Boolean) client.execute("rssani.moverRegexp", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(getFrame(), "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar();
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonDownActionPerformed
 
@@ -1002,7 +1009,7 @@ public class RaX2View extends FrameView {
         }
 
         log = new Log(client);
-        log.setLocationRelativeTo(getFrame());
+        log.setLocationRelativeTo(this);
         log.setVisible(true);
     }//GEN-LAST:event_jButtonLogActionPerformed
 
@@ -1016,7 +1023,7 @@ public class RaX2View extends FrameView {
         }
 
         // Pregunto antes
-        int si = JOptionPane.showConfirmDialog(getFrame(), "¿Esta seguro de eliminar " + jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0) + "?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+        int si = JOptionPane.showConfirmDialog(this, "¿Esta seguro de eliminar " + jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0) + "?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
         if (si == 1) {
             return;
         }
@@ -1030,7 +1037,7 @@ public class RaX2View extends FrameView {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(getFrame(), ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -1041,7 +1048,7 @@ private void jButtonOpcionesActionPerformed(java.awt.event.ActionEvent evt) {//G
         synchronized public void run() {
             // Creo el dialogo de opciones con sus cosas
             Opciones opc = new Opciones(propiedades, client, jComboBoxIP.getSelectedItem().toString());
-            opc.setLocationRelativeTo(getFrame());
+            opc.setLocationRelativeTo(null);
             opc.setVisible(true);
 
         }
@@ -1063,7 +1070,7 @@ private void jToggleButtonConnectActionPerformed(java.awt.event.ActionEvent evt)
 
 private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBorrarHostActionPerformed
     // Eliminamos la ip con su config
-    int si = JOptionPane.showConfirmDialog(getFrame(), "¿Esta seguro de eliminar " + jComboBoxIP.getSelectedItem() + "?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+    int si = JOptionPane.showConfirmDialog(this, "¿Esta seguro de eliminar " + jComboBoxIP.getSelectedItem() + "?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
     if (si == 1) {
         return;
     }
@@ -1096,7 +1103,7 @@ private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {/
 
 private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTrackersActionPerformed
     Trackers trk = new Trackers(client);
-    trk.setLocationRelativeTo(getFrame());
+    trk.setLocationRelativeTo(this);
     trk.setVisible(true);
 }//GEN-LAST:event_jButtonTrackersActionPerformed
 
