@@ -51,26 +51,39 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 /**
- * The application's main frame.
+ * Main application window for RaX-2. Provides a GUI for managing RSS expressions,
+ * connecting to the rssani server, and controlling remote operations.
  */
 public class RaX2View extends javax.swing.JFrame {
 
+    /** XML-RPC client configuration. */
     XmlRpcClientConfigImpl config;
+    /** XML-RPC client for server communication. */
     XmlRpcClient client;
+    /** Preferences store for local settings. */
     Preferences propiedades;
+    /** Unused configuration filename constant. */
     String FICHERO_CONFIGURACION = "Configuracion.properties";
+    /** Number of hosts stored in preferences. */
     int items;
+    /** Auxiliary string for building preference keys. */
     String auxitem;
+    /** Table model for RSS expressions. */
     DefaultTableModel model;
+    /** Application version string. */
     String version = "0.7.1";
+    /** Log viewer dialog instance. */
     Log log;
+    /** List of authenticated tracker names. */
     Vector <String>trackers;
+    /** System tray icon. */
     TrayIcon trayIcon;
 
     class MyWindowListener implements WindowListener {
 
         @Override
         public void windowClosing(WindowEvent arg0) {
+            System.exit(0);
         }
 
         @Override
@@ -178,10 +191,16 @@ public class RaX2View extends javax.swing.JFrame {
 
     }
 
+    /**
+     * Creates new main application frame.
+     * Initializes XML-RPC client, loads saved hosts from preferences,
+     * and sets up the system tray icon.
+     */
     public RaX2View() {
         super();
         this.setTitle(getTitle() + ' ' + version);
         this.setMinimumSize(new Dimension(600, 470));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         FileInputStream f = null;
         config = new XmlRpcClientConfigImpl();
         client = new XmlRpcClient();
@@ -209,6 +228,7 @@ public class RaX2View extends javax.swing.JFrame {
         this.addWindowListener(new MyWindowListener());
 
         creaPopup();
+        this.setVisible(true);
     }
 
     private void toggleVisible(){
@@ -225,67 +245,48 @@ public class RaX2View extends javax.swing.JFrame {
 
     private void crearBandeja() {
         if (SystemTray.isSupported()) {
-            ActionListener exitListener = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println("Exiting...");
-                    System.exit(0);
-                }
-            };
-
-            ActionListener actionListenerB = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // trayIcon.displayMessage("Action Event","An Action Event Has Been Performed!",TrayIcon.MessageType.INFO);
-                }
-            };
-
-            MouseListener mouseListener = new MouseListener() {
-
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    // System.out.println("Tray Icon - Mouse clicked!");
-                   toggleVisible();
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    // System.out.println("Tray Icon - Mouse entered!");
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    // System.out.println("Tray Icon - Mouse exited!");
-                }
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    // System.out.println("Tray Icon - Mouse pressed!");
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    // System.out.println("Tray Icon - Mouse released!");
-                }
-            };
-
             SystemTray tray = SystemTray.getSystemTray();
 
             Image image = new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/rax2.png")).getImage();
 
-            PopupMenu popup = new PopupMenu();
-            MenuItem defaultItem = new MenuItem("Exit");
-            defaultItem.addActionListener(exitListener);
-            popup.add(defaultItem);
+            JPopupMenu popupMenu = new JPopupMenu();
+            JMenuItem exitMenuItem = new JMenuItem("Exit");
+            exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                }
+            });
+            popupMenu.add(exitMenuItem);
 
-
-            trayIcon = new TrayIcon(image, "RaX 2", popup);
-
+            trayIcon = new TrayIcon(image, "RaX 2");
             trayIcon.setImageAutoSize(true);
-            trayIcon.addActionListener(actionListenerB);
-            trayIcon.addMouseListener(mouseListener);
+
+            trayIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mousePressed(java.awt.event.MouseEvent e) {
+                    if (e.isPopupTrigger()) {
+                        popupMenu.setLocation(e.getX(), e.getY());
+                        popupMenu.setInvoker(popupMenu);
+                        popupMenu.setVisible(true);
+                    }
+                }
+
+                @Override
+                public void mouseReleased(java.awt.event.MouseEvent e) {
+                    if (e.isPopupTrigger()) {
+                        popupMenu.setLocation(e.getX(), e.getY());
+                        popupMenu.setInvoker(popupMenu);
+                        popupMenu.setVisible(true);
+                    }
+                }
+
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    toggleVisible();
+                }
+            });
 
             try {
                 tray.add(trayIcon);
@@ -1112,33 +1113,61 @@ private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//G
     }//GEN-LAST:event_jComboBoxIPActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    /** Add expression button. */
     private javax.swing.JButton jButtonAdd;
+    /** Delete host button. */
     private javax.swing.JButton jButtonBorrarHost;
+    /** Move expression down button. */
     private javax.swing.JButton jButtonDown;
+    /** Kill/disconnect button. */
     private javax.swing.JButton jButtonKill;
+    /** Open log viewer button. */
     private javax.swing.JButton jButtonLog;
+    /** Open settings button. */
     private javax.swing.JButton jButtonOpciones;
+    /** Save expressions button. */
     private javax.swing.JButton jButtonSave;
+    /** Open trackers dialog button. */
     private javax.swing.JButton jButtonTrackers;
+    /** Move expression up button. */
     private javax.swing.JButton jButtonUp;
+    /** Host selection combo box. */
     private javax.swing.JComboBox jComboBoxIP;
+    /** IP label. */
     private javax.swing.JLabel jLabel1;
+    /** IP label (second). */
     private javax.swing.JLabel jLabel2;
+    /** Port label. */
     private javax.swing.JLabel jLabel3;
+    /** Last update label. */
     private javax.swing.JLabel jLabel4;
+    /** Filter label. */
     private javax.swing.JLabel jLabel5;
+    /** Timer display label. */
     private javax.swing.JLabel jLabelTimer;
+    /** Last update date display label. */
     private javax.swing.JLabel jLabelUltimoFecha;
+    /** Last update time display label. */
     private javax.swing.JLabel jLabelUltimoHora;
+    /** Timer and info panel. */
     private javax.swing.JPanel jPanel1;
+    /** Up/down buttons panel. */
     private javax.swing.JPanel jPanel2;
+    /** Table scroll pane. */
     private javax.swing.JScrollPane jScrollPane1;
+    /** Visual separator. */
     private javax.swing.JSeparator jSeparator1;
+    /** Expressions table. */
     private javax.swing.JTable jTable1;
+    /** Table row sorter for filtering. */
     private TableRowSorter<TableModel> sorter;
+    /** Filter text field. */
     private javax.swing.JTextField jTextFieldFiltro;
+    /** Port number text field. */
     private javax.swing.JTextField jTextFieldPort;
+    /** Connect/disconnect toggle button. */
     private javax.swing.JToggleButton jToggleButtonConnect;
+    /** Main content panel. */
     private javax.swing.JPanel mainPanel;
     // End of variables declaration//GEN-END:variables
 }
