@@ -32,8 +32,8 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 
 /**
- *
- * @author  Usuario
+ * Log viewer dialog that displays paginated log entries from the rssani server.
+ * @author Usuario
  */
 class DateRenderer extends DefaultTableCellRenderer {
     /* Clase que renderiza la fecha en la tabla del log */
@@ -54,6 +54,9 @@ class DateRenderer extends DefaultTableCellRenderer {
     }
 }
 
+/**
+ * Log viewer dialog for displaying server log entries in a table with filtering.
+ */
 public class Log extends javax.swing.JFrame {
 
     class MyAdjustmentListener implements AdjustmentListener {
@@ -94,13 +97,21 @@ public class Log extends javax.swing.JFrame {
             }
         }
     }
+    /** Vertical scroll bar for the log table. */
     JScrollBar verticalScrollBar;
+    /** Horizontal scroll bar for the log table. */
     JScrollBar horizontalScrollBar;
+    /** XML-RPC client for server communication. */
     private XmlRpcClient _client;
+    /** Number of log entries to fetch per page. */
     int offset = 20;
+    /** Maximum scroll position tracked. */
     int max = 0;
 
-    /** Creates new form Log */
+    /**
+     * Creates new form Log.
+     * @param client the XML-RPC client for server communication
+     */
     public Log(XmlRpcClient client) {
         initComponents();
         _client = client;
@@ -257,28 +268,50 @@ public class Log extends javax.swing.JFrame {
         }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    /** Filter label. */
     private javax.swing.JLabel jLabel1;
+    /** Unused scroll pane (legacy). */
     private javax.swing.JScrollPane jScrollPane1;
+    /** Scroll pane for the log table. */
     private javax.swing.JScrollPane jScrollPaneLog;
+    /** Log entries table. */
     private javax.swing.JTable jTable1;
+    /** Table row sorter for filtering. */
     private TableRowSorter<TableModel> sorter;
+    /** Text field for filtering log entries. */
     private javax.swing.JTextField jTextFieldFiltro;
+    /** Unused tree component (legacy). */
     private javax.swing.JTree jTree1;
     // End of variables declaration//GEN-END:variables
 
+    /**
+     * Returns the scroll pane containing the log table.
+     * @return the log scroll pane
+     */
     public JScrollPane getJScrollPaneLog() {
         return jScrollPaneLog;
     }
 
+    /**
+     * Sets the scroll pane containing the log table.
+     * @param jScrollPaneLog the log scroll pane
+     */
     public void setJScrollPaneLog(JScrollPane jScrollPaneLog) {
         this.jScrollPaneLog = jScrollPaneLog;
     }
-    // End of variables declaration
 
+    /**
+     * Returns the log table.
+     * @return the log table
+     */
     public JTable getJTable1() {
         return jTable1;
     }
 
+    /**
+     * Sets the log table.
+     * @param jTable1 the log table
+     */
     public void setJTable1(JTable jTable1) {
         this.jTable1 = jTable1;
     }

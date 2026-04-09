@@ -17,16 +17,20 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 
 /**
- *
+ * Tracker authentication management dialog.
  * @author selu
  */
 public class Trackers extends javax.swing.JFrame {
 
+    /** XML-RPC client for server communication. */
     private XmlRpcClient _client;
+    /** Table model for tracker credentials. */
     private DefaultTableModel model;
 
-    /** Creates new form Trackers
-     * @param client */
+    /**
+     * Creates new form Trackers.
+     * @param client the XML-RPC client for server communication
+     */
     public Trackers(XmlRpcClient client) {
         initComponents();
         tablaRegexp.getColumnModel().getColumn(1).setMinWidth(60);
@@ -208,7 +212,7 @@ public class Trackers extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonAnadirActionPerformed
-    /**
+    /*
      * @param args the command line arguments
      */
     /*    public static void main(String args[]) {
@@ -219,9 +223,13 @@ public class Trackers extends javax.swing.JFrame {
     });
     }*/
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    /** Add tracker button. */
     private javax.swing.JButton jButtonAnadir;
+    /** Remove tracker button. */
     private javax.swing.JButton jButtonBorrar;
+    /** Scroll pane for the trackers table. */
     private javax.swing.JScrollPane jScrollPane1;
+    /** Table displaying tracker credentials. */
     private javax.swing.JTable tablaRegexp;
     // End of variables declaration//GEN-END:variables
 }

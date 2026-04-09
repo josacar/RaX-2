@@ -13,16 +13,24 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 /**
- *
- * @author  Usuario
+ * Settings dialog for managing RPC credentials and server options.
+ * @author Usuario
  */
 public class Opciones extends javax.swing.JFrame {
 
+    /** XML-RPC client for server communication. */
     private XmlRpcClient _client;
+    /** Preferences store for local settings. */
     private Preferences _opciones;
+    /** Current host being configured. */
     private String _host;
 
-    /** Creates new form Opciones */
+    /**
+     * Creates new form Opciones.
+     * @param opciones the preferences store for local settings
+     * @param client the XML-RPC client for server communication
+     * @param host the current host being configured
+     */
     public Opciones(Preferences opciones, XmlRpcClient client, String host) {
         initComponents();
         _client = client;
@@ -315,21 +323,37 @@ private void jButtonModificarActionPerformed(java.awt.event.ActionEvent evt) {//
     }
 }//GEN-LAST:event_jButtonModificarActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    /** Accept changes button. */
     private javax.swing.JButton jButtonAceptar;
+    /** Cancel button. */
     private javax.swing.JButton jButtonCancelar;
+    /** Update credentials button. */
     private javax.swing.JButton jButtonModificar;
+    /** Save credentials button. */
     private javax.swing.JButton jButtonSaveAuth;
+    /** User label. */
     private javax.swing.JLabel jLabel1;
+    /** Password label. */
     private javax.swing.JLabel jLabel2;
+    /** Torrents path label. */
     private javax.swing.JLabel jLabel5;
+    /** Mail from label. */
     private javax.swing.JLabel jLabel6;
+    /** Mail to label. */
     private javax.swing.JLabel jLabel7;
+    /** Credentials panel. */
     private javax.swing.JPanel jPanel1;
+    /** Server options panel. */
     private javax.swing.JPanel jPanel2;
+    /** Mail from text field. */
     private javax.swing.JTextField jTextFieldMailFrom;
+    /** Mail to text field. */
     private javax.swing.JTextField jTextFieldMailTo;
+    /** RPC password text field. */
     private javax.swing.JTextField jTextFieldRpcPass;
+    /** RPC user text field. */
     private javax.swing.JTextField jTextFieldRpcUser;
+    /** Torrents path text field. */
     private javax.swing.JTextField jTextFieldRuta;
     // End of variables declaration//GEN-END:variables
 }

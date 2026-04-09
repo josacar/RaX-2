@@ -6,13 +6,13 @@
 package rax2;
 
 /**
- *
+ * Unused splash frame template.
  * @author selu
  */
 public class NewJFrame extends javax.swing.JFrame {
 
     /**
-     * Creates new form NewJFrame
+     * Creates new form NewJFrame.
      */
     public NewJFrame() {
         initComponents();
@@ -55,6 +55,7 @@ public class NewJFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     /**
+     * Entry point for testing the splash frame standalone.
      * @param args the command line arguments
      */
     public static void main(String args[]) {
@@ -90,6 +91,7 @@ public class NewJFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    /** Splash image label. */
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
