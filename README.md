@@ -39,9 +39,19 @@ All dependencies are stored in the `lib/` directory (git-ignored):
 | JGoodies Looks | 2.5.3 | Custom Look & Feel |
 | JGoodies Common | 1.8.1 | JGoodies common utilities |
 
-> **Note:** Dependencies are not tracked in git. Ensure `lib/apache-xmlrpc/` and `lib/jgoodies/` contain the required JARs before building.
+> **Note:** For Ant builds, dependencies are not tracked in git. Ensure `lib/apache-xmlrpc/` and `lib/jgoodies/` contain the required JARs before building. Maven builds download dependencies automatically.
 
 ## Building
+
+### Using Maven
+
+```bash
+# Build the project
+mvn package
+
+# Run the application
+java -jar target/RaX2.jar
+```
 
 ### Using Docker / Podman
 
