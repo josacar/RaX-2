@@ -18,7 +18,7 @@ RaX-2 is a Swing-based desktop client that provides a graphical interface for ma
 - Configure server options (email, paths)
 - System tray integration with minimize-to-tray support
 - Multiple host profiles with saved credentials
-- JGoodies Plastic3D Look & Feel (ExperienceBlue theme)
+- FlatLaf Light Look & Feel
 
 ## Prerequisites
 
@@ -36,10 +36,9 @@ All dependencies are stored in the `lib/` directory (git-ignored):
 | Apache XML-RPC Common | 3.1.3 | XML-RPC common types |
 | WS-Commons Util | 1.0.2 | XML-RPC utility |
 | Commons Logging | 1.1 | Logging framework |
-| JGoodies Looks | 2.5.3 | Custom Look & Feel |
-| JGoodies Common | 1.8.1 | JGoodies common utilities |
+| FlatLaf | 3.7 | Modern Look & Feel |
 
-> **Note:** For Ant builds, dependencies are not tracked in git. Ensure `lib/apache-xmlrpc/` and `lib/jgoodies/` contain the required JARs before building. Maven builds download dependencies automatically.
+> **Note:** For Ant builds, dependencies are not tracked in git. Ensure `lib/apache-xmlrpc/` and `lib/flatlaf/` contain the required JARs before building. Maven builds download dependencies automatically.
 
 ## Building
 
@@ -132,7 +131,7 @@ RaX-2/
 │       └── resources/            # UI icon files (PNGs)
 ├── lib/                          # Dependencies (git-ignored)
 │   ├── apache-xmlrpc/
-│   ├── jgoodies/
+│   ├── flatlaf/
 │   └── nblibraries.properties
 ├── nbproject/                    # NetBeans project configuration
 ├── build.xml                     # Ant build script
@@ -168,14 +167,14 @@ No automated testing framework is currently configured. The project does not inc
 - **IDE:** NetBeans is recommended for GUI form editing (Matisse GUI Builder)
 - **Build Tool:** Apache Ant via `nbproject/build-impl.xml`
 - **Java Level:** Source and target compatibility set to Java 21
-- **Look & Feel:** JGoodies Plastic3D with ExperienceBlue theme
+- **Look & Feel:** FlatLaf Light theme
 
 ### Adding Dependencies
 
 Place required JARs in the appropriate `lib/` subdirectories:
 
 - `lib/apache-xmlrpc/` — XML-RPC libraries
-- `lib/jgoodies/` — JGoodies libraries
+- `lib/flatlaf/` — FlatLaf library
 
 Then update `lib/nblibraries.properties` if needed.
 

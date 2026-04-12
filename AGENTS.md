@@ -59,14 +59,14 @@ No automated testing framework is configured. There are no test source directori
 Dependencies are **not** tracked in git. Ensure these directories contain the required JARs before building:
 
 - `lib/apache-xmlrpc/` — Apache XML-RPC 3.1.3 (client, common, server), WS-Commons Util 1.0.2, Commons Logging 1.1
-- `lib/jgoodies/` — JGoodies Looks 2.5.3, JGoodies Common 1.8.1
+- `lib/flatlaf/` — FlatLaf 3.7
 
 ### Code Conventions
 
 - **Package:** Single flat package `rax2` (no sub-packages)
 - **Language:** Java 21
 - **UI strings:** Mixed Spanish/English (Spanish is intentional per author locale)
-- **Look & Feel:** JGoodies Plastic3D with `ExperienceBlue` theme
+- **Look & Feel:** FlatLaf Light theme
 - **Entry point:** `rax2.RaX2App` (main class)
 
 ### XML-RPC Communication
