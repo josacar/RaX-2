@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**RaX-2** is a Java SE 11 desktop GUI application for remotely controlling an **rssani** server via XML-RPC. It's a NetBeans Ant-based project with Swing UI components.
+**RaX-2** is a Java SE 21 desktop GUI application for remotely controlling an **rssani** server via XML-RPC. It's a NetBeans Ant-based project with Swing UI components.
 
 ## Build Commands
 
@@ -64,7 +64,7 @@ Dependencies are **not** tracked in git. Ensure these directories contain the re
 ### Code Conventions
 
 - **Package:** Single flat package `rax2` (no sub-packages)
-- **Language:** Java 11
+- **Language:** Java 21
 - **UI strings:** Mixed Spanish/English (Spanish is intentional per author locale)
 - **Look & Feel:** JGoodies Plastic3D with `ExperienceBlue` theme
 - **Entry point:** `rax2.RaX2App` (main class)

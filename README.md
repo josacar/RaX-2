@@ -8,7 +8,7 @@ RaX-2 is a Swing-based desktop client that provides a graphical interface for ma
 
 **Version:** 0.7.1  
 **Author:** selu  
-**Java Version:** 11
+**Java Version:** 21
 
 ## Features
 
@@ -22,7 +22,7 @@ RaX-2 is a Swing-based desktop client that provides a graphical interface for ma
 
 ## Prerequisites
 
-- **Java 11** or higher (JDK)
+- **Java 21** or higher (JDK)
 - **Apache Ant** (for building from CLI)
 - **NetBeans IDE** (optional, for GUI editing and IDE integration)
 
@@ -167,7 +167,7 @@ No automated testing framework is currently configured. The project does not inc
 
 - **IDE:** NetBeans is recommended for GUI form editing (Matisse GUI Builder)
 - **Build Tool:** Apache Ant via `nbproject/build-impl.xml`
-- **Java Level:** Source and target compatibility set to Java 11
+- **Java Level:** Source and target compatibility set to Java 21
 - **Look & Feel:** JGoodies Plastic3D with ExperienceBlue theme
 
 ### Adding Dependencies
