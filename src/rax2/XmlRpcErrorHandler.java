@@ -29,8 +29,8 @@ final class XmlRpcErrorHandler {
      */
     static void showConnectionError(Component parent, XmlRpcException ex) {
         if (ex.code == 0) {
-            JOptionPane.showMessageDialog(parent, "No se pudo conectar al servidor",
-                    "Error de conexión", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parent, "Could not connect to server",
+                    "Connection Error", JOptionPane.ERROR_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(parent, "Error: " + ex.code + " " + ex,
                     "Error", JOptionPane.ERROR_MESSAGE);

@@ -142,7 +142,7 @@ public class RaX2View extends javax.swing.JFrame {
     private void creaPopup() {
         JPopupMenu popupMenu = new JPopupMenu();
 
-        JMenuItem copyMenuItem = new JMenuItem("Copiar",new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit-copy.png")));
+        JMenuItem copyMenuItem = new JMenuItem("Copy",new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit-copy.png")));
         copyMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -155,7 +155,7 @@ public class RaX2View extends javax.swing.JFrame {
 
         popupMenu.addSeparator();
 
-        JMenuItem editMenuItem = new JMenuItem("Editar", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit.png")));
+        JMenuItem editMenuItem = new JMenuItem("Edit", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit.png")));
         editMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -165,7 +165,7 @@ public class RaX2View extends javax.swing.JFrame {
         });
         popupMenu.add(editMenuItem);
 
-        JMenuItem delMenuItem = new JMenuItem("Borrar", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_remove.png")));
+        JMenuItem delMenuItem = new JMenuItem("Delete", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_remove.png")));
         delMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -175,7 +175,7 @@ public class RaX2View extends javax.swing.JFrame {
         });
         popupMenu.add(delMenuItem);
 
-        JMenuItem actdesMenuItem = new JMenuItem("Act/Des", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/actdes.png")));
+        JMenuItem actdesMenuItem = new JMenuItem("Enable/Disable", new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/actdes.png")));
         actdesMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             @Override
@@ -594,7 +594,7 @@ public class RaX2View extends javax.swing.JFrame {
         model.addColumn("Vencimiento");
         model.addColumn("Mail");
         model.addColumn("Tracker");
-        model.addColumn("Dias");
+        model.addColumn("Days");
         model.addColumn("Activa");
         jTable1.setModel(model);
         javax.swing.table.TableColumn var_col = jTable1.getColumnModel().getColumn(2);
@@ -652,7 +652,7 @@ public class RaX2View extends javax.swing.JFrame {
         jTextFieldFiltro.setName("jTextFieldFiltro"); // NOI18N
 
         jButtonBorrarHost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_remove.png"))); // NOI18N
-        jButtonBorrarHost.setText("Borrar"); // NOI18N
+        jButtonBorrarHost.setText("Delete"); // NOI18N
         jButtonBorrarHost.setName("jButtonBorrarHost"); // NOI18N
         jButtonBorrarHost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -793,7 +793,7 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Preguntamos como tito bill
-        int si = JOptionPane.showConfirmDialog(this, "¿Esta seguro de matar rssani?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+        int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to kill rssani?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
         if (si == 1) {
             return;
         }
@@ -804,7 +804,7 @@ public class RaX2View extends javax.swing.JFrame {
             result = (Boolean) client.execute("rssani.shutdown", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(this, "No se pudo detener", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Could not stop", "Error", JOptionPane.WARNING_MESSAGE);
             }
         } catch (XmlRpcException ex) {
             XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
@@ -826,7 +826,7 @@ public class RaX2View extends javax.swing.JFrame {
             Boolean result = (Boolean) client.execute("rssani.guardar", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(this, "No se pudo guardar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Could not save", "Error", JOptionPane.WARNING_MESSAGE);
             }
         } catch (XmlRpcException ex) {
             XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
@@ -852,7 +852,7 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Dialogo de edicion de la regexp
-        String cadDest = JOptionPane.showInputDialog("Introduce la nueva RegExp", cadOrig);
+        String cadDest = JOptionPane.showInputDialog("Enter the new RegExp", cadOrig);
         if (cadDest == null || cadDest.equals("")) {
             return;
         }
@@ -864,7 +864,7 @@ public class RaX2View extends javax.swing.JFrame {
             Boolean result = (Boolean) client.execute("rssani.editarRegexpI", params);
 
             if (result) {
-                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar(); // Refrescamos desde el servidor
             }
@@ -898,7 +898,7 @@ public class RaX2View extends javax.swing.JFrame {
             Boolean result = (Boolean) client.execute("rssani.activarRegexp", params);
 
             if (result) {
-                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar(); // Refrescamos desde el servidor
             }
@@ -915,24 +915,24 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Dialogo para la nueva regexp
-        String cadena = JOptionPane.showInputDialog("Introduce la RegExp a añadir");
+        String cadena = JOptionPane.showInputDialog("Enter the RegExp to add");
         if (cadena == null || cadena.equals("")) {
             return;
         }
 
         // Dialogo para la fecha
-        String vencimiento = JOptionPane.showInputDialog("Introduce el vencimiento (dd-mm-yyyy)", "");
+        String vencimiento = JOptionPane.showInputDialog("Enter the expiration date (dd-mm-yyyy)", "");
         if (vencimiento == null) {
             return;
         }
 
         // Dialogo para solo mail
-        int mail = JOptionPane.showConfirmDialog(this, "¿Solo mail?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+        int mail = JOptionPane.showConfirmDialog(this, "Email only?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
 
         boolean bmail = mail == 0 ? true : false;
 
         // Dialogo para el tracker
-        String tracker = (String) JOptionPane.showInputDialog(this, "Introduce el tracker (solo el host)", "titulo", JOptionPane.DEFAULT_OPTION, null, trackers.toArray(), null);
+        String tracker = (String) JOptionPane.showInputDialog(this, "Enter the tracker (host only)", "Tracker", JOptionPane.DEFAULT_OPTION, null, trackers.toArray(), null);
         if (tracker == null) {
             return;
         }
@@ -973,7 +973,7 @@ public class RaX2View extends javax.swing.JFrame {
             Boolean result = (Boolean) client.execute("rssani.moverRegexp", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar();
             }
@@ -995,7 +995,7 @@ public class RaX2View extends javax.swing.JFrame {
             Boolean result = (Boolean) client.execute("rssani.moverRegexp", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 Conectar();
             }
@@ -1025,7 +1025,7 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Pregunto antes
-        int si = JOptionPane.showConfirmDialog(this, "¿Esta seguro de eliminar " + jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0) + "?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+        int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0) + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
         if (si == 1) {
             return;
         }
@@ -1072,7 +1072,7 @@ private void jToggleButtonConnectActionPerformed(java.awt.event.ActionEvent evt)
 
 private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBorrarHostActionPerformed
     // Eliminamos la ip con su config
-    int si = JOptionPane.showConfirmDialog(this, "¿Esta seguro de eliminar " + jComboBoxIP.getSelectedItem() + "?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+    int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + jComboBoxIP.getSelectedItem() + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
     if (si == 1) {
         return;
     }

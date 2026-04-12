@@ -295,9 +295,9 @@ private void jButtonAceptarActionPerformed(java.awt.event.ActionEvent evt) {//GE
             Boolean result = (Boolean) _client.execute("rssani.ponerOpciones", params);
 
             if (!result) {
-                JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Se cambiaron las opciones", "Exito", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Options updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
                 jButtonSaveAuthActionPerformed(null);
             }
         } catch (XmlRpcException ex) {
@@ -315,9 +315,9 @@ private void jButtonModificarActionPerformed(java.awt.event.ActionEvent evt) {//
         Boolean result = (Boolean) _client.execute("rssani.ponerCredenciales", params);
 
         if (!result) {
-            JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(this, "Se cambiaron los credenciales", "Exito", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Credentials updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
             jButtonSaveAuthActionPerformed(null);
 
         }

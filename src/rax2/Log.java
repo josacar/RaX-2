@@ -186,7 +186,7 @@ public class Log extends javax.swing.JFrame {
         jTable1.setModel(new DefaultTableModel(
             new Object[][]{},
             new String[]{
-                "Fecha", "Titulo"
+                "Date", "Title"
             }) {
 
                 public Class getColumnClass(int column) {

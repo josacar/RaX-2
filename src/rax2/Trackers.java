@@ -155,7 +155,7 @@ public class Trackers extends javax.swing.JFrame {
         if (tablaRegexp.getSelectedRow() == -1) {
             return;
         }
-        int si = JOptionPane.showConfirmDialog(this, "¿Esta seguro de eliminar " + tablaRegexp.getModel().getValueAt(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()), 0) + "?", "Pregunta", javax.swing.JOptionPane.YES_NO_OPTION);
+        int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + tablaRegexp.getModel().getValueAt(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()), 0) + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
         if (si == 1) {
             return;
         }
@@ -172,26 +172,26 @@ public class Trackers extends javax.swing.JFrame {
 
     private void jButtonAnadirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAnadirActionPerformed
         // Dialogo para el nuevo tracker
-        String tracker = JOptionPane.showInputDialog("Introduce la url del tracker", "http://");
+        String tracker = JOptionPane.showInputDialog("Enter the tracker URL", "http://");
         if (tracker == null || tracker.equals("") || tracker.equals("http://")) {
             return;
         }
 
         // Dialogo para el uid
-        String uid = JOptionPane.showInputDialog("Introduce el uid");
+        String uid = JOptionPane.showInputDialog("Enter the UID");
         if (uid == null) {
             return;
         }
 
         // Dialogo para el pass
-        String pass = JOptionPane.showInputDialog("Introduce el hash del password");
+        String pass = JOptionPane.showInputDialog("Enter the password hash");
 
         if (pass == null) {
             return;
         }
 
         // Dialogo para la passkey
-        String passkey = JOptionPane.showInputDialog("Introduce la passkey");
+        String passkey = JOptionPane.showInputDialog("Enter the passkey");
 
         if (passkey == null) {
             return;
