@@ -1,0 +1,45 @@
+[tasks.clean]
+description = "Clean build artifacts"
+run = "ant clean"
+
+[tasks.build]
+description = "Build the project"
+run = "ant"
+
+[tasks.run]
+description = "Run the application (requires X11 display)"
+run = "ant run"
+
+[tasks.debug]
+description = "Run the application in debug mode"
+run = "ant debug"
+
+[tasks.docker-build]
+description = "Build Docker image"
+run = "podman build -t rax2 ."
+
+[tasks.docker-run]
+description = "Run RaX-2 in Docker with X11"
+run = """
+podman run --rm \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v $HOME/.Xauthority:/root/.Xauthority:ro \
+  -e XAUTHORITY=/root/.Xauthority \
+  rax2
+"""
+
+[tasks.docker-clean]
+description = "Remove local Docker image"
+run = "podman rmi rax2 2>/dev/null || true"
+
+[tasks.repackage]
+description = "Clean, build, and rebuild Docker image"
+depends = ["clean", "build", "docker-clean", "docker-build"]
+
+[tasks.dependencies]
+description = "Download all runtime dependencies via Maven"
+run = """
+mkdir -p lib/apache-xmlrpc lib/flatlaf
+mvn dependency:copy-dependencies -DoutputDirectory=lib/
+"""
