@@ -50,13 +50,17 @@ public class Opciones extends javax.swing.JFrame {
             try {
                 Object[] params = new Object[0];
 
-                HashMap struct = (HashMap) _client.execute("rssani.verOpciones", params);
+                HashMap<?, ?> map = (HashMap<?, ?>) _client.execute("rssani.verOpciones", params);
+                ServerOptions options = new ServerOptions(
+                        (String) map.get("fromMail"),
+                        (String) map.get("toMail"),
+                        (String) map.get("path"));
 
-                jTextFieldMailFrom.setText((String) struct.get("fromMail"));
-                jTextFieldMailTo.setText((String) struct.get("toMail"));
-                jTextFieldRuta.setText((String) struct.get("path"));
+                jTextFieldMailFrom.setText(options.getFromMail());
+                jTextFieldMailTo.setText(options.getToMail());
+                jTextFieldRuta.setText(options.getPath());
             } catch (XmlRpcException ex) {
-                JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         String user = _opciones.get("rpcUser" + _host, "");

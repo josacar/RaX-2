@@ -36,27 +36,23 @@ public class Trackers extends javax.swing.JFrame {
         tablaRegexp.getColumnModel().getColumn(1).setMinWidth(60);
         tablaRegexp.getColumnModel().getColumn(1).setMaxWidth(60);
         _client = client;
-        HashMap struct;
-
         try {
             Object[] params = new Object[]{};
 
             Object[] result = (Object[]) _client.execute("rssani.listaAuths", params);
 
-            // Insertamos las regexps recibidas, haciendo casting
             for (int i = 0; i < result.length; ++i) {
-                struct = (HashMap) result[i];
-                model.addRow(new Object[]{struct.get("tracker"), struct.get("uid"), struct.get("pass"), struct.get("passkey")});
+                HashMap<?, ?> map = (HashMap<?, ?>) result[i];
+                TrackerAuth auth = new TrackerAuth(
+                        (String) map.get("tracker"),
+                        (String) map.get("uid"),
+                        (String) map.get("pass"),
+                        (String) map.get("passkey"));
+                model.addRow(new Object[]{auth.getTracker(), auth.getUid(), auth.getPass(), auth.getPasskey()});
             }
 
-            /*if (!result) {
-            JOptionPane.showMessageDialog(this, "No se pudo cambiar", "Error", JOptionPane.WARNING_MESSAGE);
-            } else {
-            JOptionPane.showMessageDialog(this, "Se cambiaron los credenciales", "Exito", JOptionPane.INFORMATION_MESSAGE);
-            }*/
-
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

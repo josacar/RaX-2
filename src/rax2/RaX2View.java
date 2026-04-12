@@ -309,8 +309,6 @@ public class RaX2View extends javax.swing.JFrame {
     }
 
     private int Conectar() {
-        Boolean mail = false;
-        Boolean activa = false;
         Boolean exito = false;
         try {
             // Ponemos los parametros de configuracion
@@ -318,8 +316,6 @@ public class RaX2View extends javax.swing.JFrame {
             config.setBasicUserName(propiedades.get("rpcUser" + jComboBoxIP.getSelectedItem().toString(), ""));
             config.setBasicPassword(propiedades.get("rpcPass" + jComboBoxIP.getSelectedItem().toString(), ""));
             Object[] params = new Object[0]; // Sin parametros de entrada
-
-            HashMap struct = new HashMap(); // Estructura tipo Struct
 
             Object[] result = (Object[]) client.execute("rssani.listaExpresiones", params);
 
@@ -329,12 +325,18 @@ public class RaX2View extends javax.swing.JFrame {
                 model.removeRow(0);
             }
 
-            // Insertamos las regexps recibidas, haciendo casting
+            // Insertamos las expresiones recibidas
             for (int i = 0; i < result.length; ++i) {
-                struct = (HashMap) result[i];
-                mail = (Boolean) struct.get("mail");
-                activa = (Boolean) struct.get("activa");
-                model.addRow(new Object[]{struct.get("nombre"), struct.get("vencimiento"), mail, struct.get("tracker"),struct.get("dias"),activa});
+                HashMap<?, ?> map = (HashMap<?, ?>) result[i];
+                Expresion exp = new Expresion(
+                        (String) map.get("nombre"),
+                        (String) map.get("vencimiento"),
+                        (Boolean) map.get("mail"),
+                        (String) map.get("tracker"),
+                        (Integer) map.get("dias"),
+                        (Boolean) map.get("activa"));
+                model.addRow(new Object[]{exp.getNombre(), exp.getVencimiento(),
+                        exp.isMail(), exp.getTracker(), exp.getDias(), exp.isActiva()});
             }
 
             // Obtenemos el timer y lo colocamos en la app
@@ -373,11 +375,14 @@ public class RaX2View extends javax.swing.JFrame {
             Object[] result4 = (Object[]) client.execute("rssani.listaAuths", params);
 
             trackers = new Vector<String>();
-            String tracker;
-
             for (int i = 0; i < result4.length; ++i) {
-                struct = (HashMap) result4[i];
-                tracker = (String) struct.get("tracker");
+                HashMap<?, ?> map = (HashMap<?, ?>) result4[i];
+                TrackerAuth auth = new TrackerAuth(
+                        (String) map.get("tracker"),
+                        (String) map.get("uid"),
+                        (String) map.get("pass"),
+                        (String) map.get("passkey"));
+                String tracker = auth.getTracker();
                 if (!trackers.contains(tracker)) {
                     trackers.add(tracker);
                 }
