@@ -590,12 +590,12 @@ public class RaX2View extends javax.swing.JFrame {
                 return false;
             }
         };
-        model.addColumn("Nombre");
-        model.addColumn("Vencimiento");
+        model.addColumn("Name");
+        model.addColumn("Expiration");
         model.addColumn("Mail");
         model.addColumn("Tracker");
         model.addColumn("Days");
-        model.addColumn("Activa");
+        model.addColumn("Active");
         jTable1.setModel(model);
         javax.swing.table.TableColumn var_col = jTable1.getColumnModel().getColumn(2);
         javax.swing.table.TableColumn var_col2 = jTable1.getColumnModel().getColumn(5);
