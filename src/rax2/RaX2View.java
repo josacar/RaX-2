@@ -391,11 +391,7 @@ public class RaX2View extends javax.swing.JFrame {
             exito = true;
             estadoBotones(true);
         } catch (XmlRpcException ex) {
-            if (ex.code == 0) {
-                JOptionPane.showMessageDialog(this, "No se pudo conectar a RSSANI", "Error de conexión", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Error: " + ex.code + " " + ex, "ola?", JOptionPane.ERROR_MESSAGE);
-            }
+            XmlRpcErrorHandler.showConnectionError(this, ex);
             Desconectar();
         } catch (MalformedURLException ex2) {
             JOptionPane.showMessageDialog(this, ex2, "ola?", JOptionPane.ERROR_MESSAGE);
@@ -811,7 +807,7 @@ public class RaX2View extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "No se pudo detener", "Error", JOptionPane.WARNING_MESSAGE);
             }
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola2?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         } finally {
             if (result) {
                 jToggleButtonConnect.setSelected(false);
@@ -833,7 +829,7 @@ public class RaX2View extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "No se pudo guardar", "Error", JOptionPane.WARNING_MESSAGE);
             }
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
@@ -874,7 +870,7 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
@@ -908,7 +904,7 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
@@ -961,7 +957,7 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonAddActionPerformed
 
@@ -983,7 +979,7 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonUpActionPerformed
 
@@ -1005,7 +1001,7 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonDownActionPerformed
 
@@ -1043,7 +1039,7 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 

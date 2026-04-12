@@ -92,7 +92,7 @@ public class Log extends javax.swing.JFrame {
                 } catch (ParseException ex) {
                     Logger.getLogger(RaX2View.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (XmlRpcException ex) {
-                    JOptionPane.showMessageDialog(null, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+                    XmlRpcErrorHandler.showErrorMessage(null, ex, "Error");
                 }
             }
         }
@@ -152,7 +152,7 @@ public class Log extends javax.swing.JFrame {
             });
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(null, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(null, ex, "Error");
         }
     }
 

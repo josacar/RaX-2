@@ -60,7 +60,7 @@ public class Opciones extends javax.swing.JFrame {
                 jTextFieldMailTo.setText(options.getToMail());
                 jTextFieldRuta.setText(options.getPath());
             } catch (XmlRpcException ex) {
-                JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
+                XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
             }
         }
         String user = _opciones.get("rpcUser" + _host, "");
@@ -301,7 +301,7 @@ private void jButtonAceptarActionPerformed(java.awt.event.ActionEvent evt) {//GE
                 jButtonSaveAuthActionPerformed(null);
             }
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
     this.dispose();
@@ -323,7 +323,7 @@ private void jButtonModificarActionPerformed(java.awt.event.ActionEvent evt) {//
         }
 
     } catch (XmlRpcException ex) {
-        JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+        XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
     }
 }//GEN-LAST:event_jButtonModificarActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

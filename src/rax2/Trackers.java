@@ -52,7 +52,7 @@ public class Trackers extends javax.swing.JFrame {
             }
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
@@ -166,7 +166,7 @@ public class Trackers extends javax.swing.JFrame {
             model.removeRow(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()));
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
 }//GEN-LAST:event_jButtonBorrarActionPerformed
 
@@ -205,7 +205,7 @@ public class Trackers extends javax.swing.JFrame {
             model.addRow(new Object[]{tracker, uid, pass});
 
         } catch (XmlRpcException ex) {
-            JOptionPane.showMessageDialog(this, ex, "ola?", JOptionPane.ERROR_MESSAGE);
+            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonAnadirActionPerformed
     /*
