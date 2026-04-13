@@ -5,12 +5,15 @@
  */
 package rax2;
 
-import java.util.HashMap;
 import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
-import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import io.grpc.StatusRuntimeException;
+import rax2.proto.RssaniServiceGrpc;
+import rax2.proto.EmptyRequest;
+import rax2.proto.OpcionesResponse;
+import rax2.proto.PonerOpcionesRequest;
+import rax2.proto.PonerCredencialesRequest;
+import rax2.proto.BoolResponse;
 
 /**
  * Settings dialog for managing RPC credentials and server options.
@@ -18,8 +21,8 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
  */
 public class Opciones extends javax.swing.JFrame {
 
-    /** XML-RPC client for server communication. */
-    private XmlRpcClient _client;
+    /** gRPC stub for server communication. */
+    private RssaniServiceGrpc.RssaniServiceBlockingStub _stub;
     /** Preferences store for local settings. */
     private Preferences _opciones;
     /** Current host being configured. */
@@ -28,40 +31,27 @@ public class Opciones extends javax.swing.JFrame {
     /**
      * Creates new form Opciones.
      * @param opciones the preferences store for local settings
-     * @param client the XML-RPC client for server communication
+     * @param stub the gRPC blocking stub for server communication
      * @param host the current host being configured
      */
-    public Opciones(Preferences opciones, XmlRpcClient client, String host) {
+    public Opciones(Preferences opciones, RssaniServiceGrpc.RssaniServiceBlockingStub stub, String host) {
         initComponents();
-        _client = client;
+        _stub = stub;
         _opciones = opciones;
         _host = host;
         iniciaValores();
     }
 
     private void iniciaValores() {
-        XmlRpcClientConfigImpl impl = (XmlRpcClientConfigImpl) _client.getClientConfig();
-        if (impl.getServerURL() == null) {
-            jTextFieldRuta.setEditable(false);
-            jTextFieldMailFrom.setEditable(false);
-            jTextFieldMailTo.setEditable(false);
-            jButtonModificar.setEnabled(false);
-        } else {
-            try {
-                Object[] params = new Object[0];
+        try {
+            EmptyRequest empty = EmptyRequest.getDefaultInstance();
+            OpcionesResponse options = _stub.verOpciones(empty);
 
-                HashMap<?, ?> map = (HashMap<?, ?>) _client.execute("rssani.verOpciones", params);
-                ServerOptions options = new ServerOptions(
-                        (String) map.get("fromMail"),
-                        (String) map.get("toMail"),
-                        (String) map.get("path"));
-
-                jTextFieldMailFrom.setText(options.getFromMail());
-                jTextFieldMailTo.setText(options.getToMail());
-                jTextFieldRuta.setText(options.getPath());
-            } catch (XmlRpcException ex) {
-                XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
-            }
+            jTextFieldMailFrom.setText(options.getFromMail());
+            jTextFieldMailTo.setText(options.getToMail());
+            jTextFieldRuta.setText(options.getPath());
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
         String user = _opciones.get("rpcUser" + _host, "");
         if (!user.equals("")) {
@@ -287,32 +277,36 @@ private void jButtonCancelarActionPerformed(java.awt.event.ActionEvent evt) {//G
 }//GEN-LAST:event_jButtonCancelarActionPerformed
 
 private void jButtonAceptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAceptarActionPerformed
-    XmlRpcClientConfigImpl config = (XmlRpcClientConfigImpl) _client.getClientConfig();
-    if (config.getServerURL() != null) {
-        try {
-            Object[] params = new Object[]{jTextFieldMailFrom.getText(), jTextFieldMailTo.getText(), jTextFieldRuta.getText()};
+    try {
+        PonerOpcionesRequest request = PonerOpcionesRequest.newBuilder()
+                .setFromMail(jTextFieldMailFrom.getText())
+                .setToMail(jTextFieldMailTo.getText())
+                .setPath(jTextFieldRuta.getText())
+                .build();
 
-            Boolean result = (Boolean) _client.execute("rssani.ponerOpciones", params);
+        Boolean result = _stub.ponerOpciones(request).getValue();
 
-            if (!result) {
-                JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Options updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
-                jButtonSaveAuthActionPerformed(null);
-            }
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        if (!result) {
+            JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Options updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            jButtonSaveAuthActionPerformed(null);
         }
+    } catch (StatusRuntimeException ex) {
+        GrpcErrorHandler.showErrorMessage(this, ex, "Error");
     }
     this.dispose();
 }//GEN-LAST:event_jButtonAceptarActionPerformed
 
 private void jButtonModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModificarActionPerformed
-// Hacemos la llamada xmlrpc con las dos cadenas
+// Hacemos la llamada gRPC con las dos cadenas
     try {
-        Object[] params = new Object[]{jTextFieldRpcUser.getText(), jTextFieldRpcPass.getText()};
+        PonerCredencialesRequest request = PonerCredencialesRequest.newBuilder()
+                .setUser(jTextFieldRpcUser.getText())
+                .setPassword(jTextFieldRpcPass.getText())
+                .build();
 
-        Boolean result = (Boolean) _client.execute("rssani.ponerCredenciales", params);
+        Boolean result = _stub.ponerCredenciales(request).getValue();
 
         if (!result) {
             JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
@@ -322,8 +316,8 @@ private void jButtonModificarActionPerformed(java.awt.event.ActionEvent evt) {//
 
         }
 
-    } catch (XmlRpcException ex) {
-        XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+    } catch (StatusRuntimeException ex) {
+        GrpcErrorHandler.showErrorMessage(this, ex, "Error");
     }
 }//GEN-LAST:event_jButtonModificarActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

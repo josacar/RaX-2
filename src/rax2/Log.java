@@ -28,8 +28,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
+import io.grpc.StatusRuntimeException;
+import rax2.proto.RssaniServiceGrpc;
+import rax2.proto.LogRequest;
+import rax2.proto.LogResponse;
 
 /**
  * Log viewer dialog that displays paginated log entries from the rssani server.
@@ -79,11 +81,14 @@ public class Log extends javax.swing.JFrame {
                 if (max == e.getValue() && verticalScrollBar.getMaximum() != verticalScrollBar.getVisibleAmount()) {
                     return; // Para que volver a llamar
                 }
-                try { // Llamada al RPC y añadimos al final
-                    Object[] params = new Object[]{offset, offset + 20};
-                    Object[] result = (Object[]) _client.execute("rssani.verLog", params);
-                    for (int i = 0; i < result.length; ++i) {
-                        aux = (String) result[i];
+                try { // Llamada al gRPC y añadimos al final
+                    LogRequest request = LogRequest.newBuilder()
+                            .setIni(offset)
+                            .setFin(offset + 20)
+                            .build();
+                    LogResponse result = _stub.verLog(request);
+                    for (int i = 0; i < result.getLinesCount(); ++i) {
+                        aux = result.getLines(i);
                         java.util.Date fecha = sdf.parse(aux.split("[|]")[0].substring(2));
                         model.addRow(new Object[]{fecha, aux.split("[|]")[1]});
                     }
@@ -91,8 +96,8 @@ public class Log extends javax.swing.JFrame {
                     max = e.getValue();
                 } catch (ParseException ex) {
                     Logger.getLogger(RaX2View.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (XmlRpcException ex) {
-                    XmlRpcErrorHandler.showErrorMessage(null, ex, "Error");
+                } catch (StatusRuntimeException ex) {
+                    GrpcErrorHandler.showErrorMessage(null, ex, "Error");
                 }
             }
         }
@@ -101,8 +106,8 @@ public class Log extends javax.swing.JFrame {
     JScrollBar verticalScrollBar;
     /** Horizontal scroll bar for the log table. */
     JScrollBar horizontalScrollBar;
-    /** XML-RPC client for server communication. */
-    private XmlRpcClient _client;
+    /** gRPC stub for server communication. */
+    private RssaniServiceGrpc.RssaniServiceBlockingStub _stub;
     /** Number of log entries to fetch per page. */
     int offset = 20;
     /** Maximum scroll position tracked. */
@@ -110,19 +115,22 @@ public class Log extends javax.swing.JFrame {
 
     /**
      * Creates new form Log.
-     * @param client the XML-RPC client for server communication
+     * @param stub the gRPC blocking stub for server communication
      */
-    public Log(XmlRpcClient client) {
+    public Log(RssaniServiceGrpc.RssaniServiceBlockingStub stub) {
         initComponents();
-        _client = client;
+        _stub = stub;
         verticalScrollBar = jScrollPaneLog.getVerticalScrollBar();
         horizontalScrollBar = jScrollPaneLog.getHorizontalScrollBar();
         jTable1.getColumnModel().getColumn(0).setMinWidth(90);
         jTable1.getColumnModel().getColumn(0).setMaxWidth(90);
 
         try {
-            Object[] params = new Object[]{0, 20};
-            final Object[] result = (Object[]) client.execute("rssani.verLog", params);
+            LogRequest request = LogRequest.newBuilder()
+                    .setIni(0)
+                    .setFin(20)
+                    .build();
+            final LogResponse result = _stub.verLog(request);
             java.awt.EventQueue.invokeLater(new Runnable() {
 
                 DefaultTableModel model;
@@ -135,10 +143,10 @@ public class Log extends javax.swing.JFrame {
                     model = (DefaultTableModel) jTable1.getModel();
                     String aux;
 
-                    for (int i = 0; i < result.length; ++i) {
+                    for (int i = 0; i < result.getLinesCount(); ++i) {
                         try {
                             //log.getJTextAreaLog().setCaretPosition(0);
-                            aux = (String) result[i];
+                            aux = result.getLines(i);
                             java.util.Date fecha = sdf.parse(aux.split("[|]")[0].substring(2));
                             model.addRow(new Object[]{fecha, aux.split("[|]")[1]});
                         } catch (ParseException ex) {
@@ -151,8 +159,8 @@ public class Log extends javax.swing.JFrame {
                 }
             });
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(null, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(null, ex, "Error");
         }
     }
 

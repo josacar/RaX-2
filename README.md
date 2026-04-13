@@ -1,13 +1,13 @@
 # RaX-2
 
-A Java SE desktop GUI application for remotely controlling an **rssani** server via XML-RPC.
+A Java SE desktop GUI application for remotely controlling an **rssani** server via **gRPC**.
 
 ## Overview
 
 RaX-2 is a Swing-based desktop client that provides a graphical interface for managing an rssani backend — a server-side RSS feed monitoring system that handles torrent trackers, regex-based expression matching, email notifications, and scheduled operations.
 
-**Version:** 0.7.1  
-**Author:** selu  
+**Version:** 0.8.0
+**Author:** selu
 **Java Version:** 21
 
 ## Features
@@ -23,22 +23,8 @@ RaX-2 is a Swing-based desktop client that provides a graphical interface for ma
 ## Prerequisites
 
 - **Java 21** or higher (JDK)
-- **Apache Ant** (for building from CLI)
-- **NetBeans IDE** (optional, for GUI editing and IDE integration)
-
-## Dependencies
-
-All dependencies are stored in the `lib/` directory (git-ignored):
-
-| Library | Version | Purpose |
-|---------|---------|---------|
-| Apache XML-RPC Client | 3.1.3 | XML-RPC client communication |
-| Apache XML-RPC Common | 3.1.3 | XML-RPC common types |
-| WS-Commons Util | 1.0.2 | XML-RPC utility |
-| Commons Logging | 1.1 | Logging framework |
-| FlatLaf | 3.7 | Modern Look & Feel |
-
-> **Note:** For Ant builds, dependencies are not tracked in git. Ensure `lib/apache-xmlrpc/` and `lib/flatlaf/` contain the required JARs before building. Maven builds download dependencies automatically.
+- **Maven** (for building)
+- **Podman / Docker** (optional, for containerized builds)
 
 ## Building
 
@@ -46,7 +32,7 @@ All dependencies are stored in the `lib/` directory (git-ignored):
 
 ```bash
 # Build the project
-mvn package
+mvn clean package -DskipTests
 
 # Run the application
 java -jar target/RaX2.jar
@@ -70,40 +56,10 @@ podman run --rm \
 
 > **Note:** Swing uses X11 internally. On Wayland compositors, XWayland provides the compatibility layer automatically.
 
-### Using Ant (CLI)
-
-```bash
-# Clean and build
-ant
-
-# Run the application
-ant run
-
-# Clean build artifacts
-ant clean
-
-# Debug the application
-ant debug
-```
-
-The output JAR is generated at `dist/RaX2.jar`.
-
-### Using NetBeans
-
-1. Open the project folder in NetBeans
-2. Use standard Run/Debug/Build actions
-3. GUI forms (`.form` files) can be edited with the NetBeans Matisse GUI Builder
-
 ## Running
 
 ```bash
-ant run
-```
-
-Or run the JAR directly:
-
-```bash
-java -jar dist/RaX2.jar
+java -jar target/RaX2.jar
 ```
 
 ## Configuration
@@ -121,42 +77,51 @@ Settings are managed through the application's Options dialog.
 ```
 RaX-2/
 ├── src/
-│   └── rax2/
-│       ├── RaX2App.java          # Application entry point (main class)
-│       ├── RaX2View.java         # Main application window (JFrame)
-│       ├── Log.java              # Log viewer dialog
-│       ├── Opciones.java         # Settings/options dialog
-│       ├── Trackers.java         # Tracker auth management dialog
-│       ├── NewJFrame.java        # Unused/splash JFrame
-│       └── resources/            # UI icon files (PNGs)
-├── lib/                          # Dependencies (git-ignored)
-│   ├── apache-xmlrpc/
-│   ├── flatlaf/
-│   └── nblibraries.properties
-├── nbproject/                    # NetBeans project configuration
-├── build.xml                     # Ant build script
-├── manifest.mf                   # JAR manifest
-└── build/                        # Build output
+│   ├── rax2/
+│   │   ├── RaX2App.java          # Application entry point (main class)
+│   │   ├── RaX2View.java         # Main application window (JFrame)
+│   │   ├── Log.java              # Log viewer dialog
+│   │   ├── Opciones.java         # Settings/options dialog
+│   │   ├── Trackers.java         # Tracker auth management dialog
+│   │   ├── GrpcErrorHandler.java # gRPC exception handling utility
+│   │   ├── Expresion.java        # Data model for RSS expression rules
+│   │   ├── TrackerAuth.java      # Data model for tracker credentials
+│   │   ├── ServerOptions.java    # Data model for server options
+│   │   └── resources/            # UI icon files (PNGs)
+│   └── main/proto/
+│       └── rssani.proto          # Protocol Buffers service definition
+├── nbproject/                    # NetBeans project configuration (legacy)
+├── build.xml                     # Ant build script (legacy)
+├── pom.xml                       # Maven build configuration
+└── target/                       # Build output
     ├── classes/
-    └── generated-sources/
+    ├── generated-sources/        # Auto-generated gRPC/Protobuf code
+    └── RaX2.jar
 ```
 
-## XML-RPC API
+## gRPC API
 
-The client communicates with the rssani server at `http://{host}:{port}/RPC2` using these remote methods:
+The client communicates with the rssani server at `{host}:{port}` (default `50051`) using a gRPC blocking stub (`RssaniServiceGrpc.RssaniServiceBlockingStub`). Each connection creates a new `ManagedChannel` that is shut down on disconnect.
 
-| Method | Purpose |
-|--------|---------|
-| `rssani.listaExpresiones` | List all regex expressions |
-| `rssani.verTimer` | Get timer interval |
-| `rssani.verUltimo` | Get last RSS fetch timestamp |
-| `rssani.listaAuths` | List tracker authentications |
-| `rssani.verLog` | Fetch log entries (paginated) |
-| `rssani.verOpciones` | Get server options |
-| `rssani.ponerOpciones` | Set server options |
-| `rssani.ponerCredenciales` | Update credentials |
-| `rssani.anadirAuth` | Add tracker auth |
-| `rssani.borrarAuth` | Remove tracker auth |
+| Method | Request | Response | Purpose |
+|--------|---------|----------|---------|
+| `listaExpresiones` | `EmptyRequest` | `RegexpListResponse` | List all regex expressions |
+| `verTimer` | `EmptyRequest` | `IntResponse` | Get timer interval (ms) |
+| `verUltimo` | `EmptyRequest` | `StringResponse` | Get last RSS fetch timestamp |
+| `listaAuths` | `EmptyRequest` | `AuthListResponse` | List tracker authentications |
+| `verLog` | `LogRequest{ini, fin}` | `LogResponse{lines[]}` | Fetch log entries (paginated) |
+| `verOpciones` | `EmptyRequest` | `OpcionesResponse` | Get server options |
+| `ponerOpciones` | `PonerOpcionesRequest` | `BoolResponse` | Set server options |
+| `ponerCredenciales` | `PonerCredencialesRequest` | `BoolResponse` | Update credentials |
+| `anadirAuth` | `AnadirAuthRequest` | `BoolResponse` | Add tracker auth |
+| `borrarAuth` | `BorrarAuthRequest` | `BoolResponse` | Remove tracker auth |
+| `anadirRegexp` | `AnadirRegexpRequest` | `BoolResponse` | Add regex expression |
+| `editarRegexpI` | `EditarRegexpIRequest` | `BoolResponse` | Edit regex by index |
+| `activarRegexp` | `ActivarRegexpRequest` | `BoolResponse` | Toggle regex active state |
+| `moverRegexp` | `MoverRegexpRequest` | `BoolResponse` | Move regex in list |
+| `borrarRegexpS` | `BorrarRegexpSRequest` | `BoolResponse` | Delete regex by name |
+| `guardar` | `EmptyRequest` | `BoolResponse` | Save server state |
+| `shutdown` | `EmptyRequest` | `BoolResponse` | Shut down server |
 
 ## Testing
 
@@ -164,19 +129,19 @@ No automated testing framework is currently configured. The project does not inc
 
 ## Development
 
-- **IDE:** NetBeans is recommended for GUI form editing (Matisse GUI Builder)
-- **Build Tool:** Apache Ant via `nbproject/build-impl.xml`
-- **Java Level:** Source and target compatibility set to Java 21
+- **Build Tool:** Maven (primary), Ant (legacy)
+- **Java Level:** Java 21
 - **Look & Feel:** FlatLaf Light theme
+- **Proto code generation:** `protobuf-maven-plugin` generates Java stubs from `rssani.proto` at compile time
 
-### Adding Dependencies
+## Migration from XML-RPC (v0.7.x → v0.8.0)
 
-Place required JARs in the appropriate `lib/` subdirectories:
-
-- `lib/apache-xmlrpc/` — XML-RPC libraries
-- `lib/flatlaf/` — FlatLaf library
-
-Then update `lib/nblibraries.properties` if needed.
+- Replaced Apache XML-RPC 3.1.3 with gRPC Java (1.70.0)
+- `XmlRpcClient` → `ManagedChannel` + `RssaniServiceGrpc.RssaniServiceBlockingStub`
+- `client.execute("rssani.method", params)` → `stub.method(request)`
+- HashMap response parsing → strongly-typed Protobuf getters
+- `XmlRpcErrorHandler` → `GrpcErrorHandler` (handles `StatusRuntimeException`)
+- Server port changed from `8080` (XML-RPC) to `50051` (gRPC)
 
 ## License
 

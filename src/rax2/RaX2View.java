@@ -14,14 +14,23 @@ import java.awt.SystemTray;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileInputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.JOptionPane;
-import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
+import rax2.proto.RssaniServiceGrpc;
+import rax2.proto.EmptyRequest;
+import rax2.proto.RegexpListResponse;
+import rax2.proto.IntResponse;
+import rax2.proto.StringResponse;
+import rax2.proto.AuthListResponse;
+import rax2.proto.BoolResponse;
+import rax2.proto.AnadirRegexpRequest;
+import rax2.proto.EditarRegexpIRequest;
+import rax2.proto.ActivarRegexpRequest;
+import rax2.proto.MoverRegexpRequest;
+import rax2.proto.BorrarRegexpSRequest;
 import java.util.prefs.Preferences;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.DefaultCellEditor;
@@ -56,10 +65,10 @@ import javax.swing.SwingUtilities;
  */
 public class RaX2View extends javax.swing.JFrame {
 
-    /** XML-RPC client configuration. */
-    XmlRpcClientConfigImpl config;
-    /** XML-RPC client for server communication. */
-    XmlRpcClient client;
+    /** gRPC channel for server communication. */
+    ManagedChannel channel;
+    /** gRPC blocking stub for server calls. */
+    RssaniServiceGrpc.RssaniServiceBlockingStub stub;
     /** Preferences store for local settings. */
     Preferences propiedades;
     /** Unused configuration filename constant. */
@@ -193,7 +202,7 @@ public class RaX2View extends javax.swing.JFrame {
 
     /**
      * Creates new main application frame.
-     * Initializes XML-RPC client, loads saved hosts from preferences,
+     * Initializes gRPC channel, loads saved hosts from preferences,
      * and sets up the system tray icon.
      */
     public RaX2View() {
@@ -202,9 +211,10 @@ public class RaX2View extends javax.swing.JFrame {
         this.setMinimumSize(new Dimension(600, 470));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         FileInputStream f = null;
-        config = new XmlRpcClientConfigImpl();
-        client = new XmlRpcClient();
-        client.setConfig(config);
+        channel = ManagedChannelBuilder.forTarget("localhost:50051")
+                .usePlaintext()
+                .build();
+        stub = RssaniServiceGrpc.newBlockingStub(channel);
         propiedades = Preferences.userNodeForPackage(this.getClass());
         items = propiedades.getInt("items", 0);
         System.out.println("Items: " + items);
@@ -311,13 +321,18 @@ public class RaX2View extends javax.swing.JFrame {
     private int Conectar() {
         Boolean exito = false;
         try {
-            // Ponemos los parametros de configuracion
-            config.setServerURL(new URL("http://" + jComboBoxIP.getSelectedItem().toString() + ":" + jTextFieldPort.getText() + "/RPC2"));
-            config.setBasicUserName(propiedades.get("rpcUser" + jComboBoxIP.getSelectedItem().toString(), ""));
-            config.setBasicPassword(propiedades.get("rpcPass" + jComboBoxIP.getSelectedItem().toString(), ""));
-            Object[] params = new Object[0]; // Sin parametros de entrada
+            // Build gRPC channel for the selected host
+            String host = jComboBoxIP.getSelectedItem().toString();
+            int port = Integer.parseInt(jTextFieldPort.getText());
+            channel.shutdownNow();
+            channel = ManagedChannelBuilder.forAddress(host, port)
+                    .usePlaintext()
+                    .build();
+            stub = RssaniServiceGrpc.newBlockingStub(channel);
 
-            Object[] result = (Object[]) client.execute("rssani.listaExpresiones", params);
+            EmptyRequest empty = EmptyRequest.getDefaultInstance();
+
+            RegexpListResponse result = stub.listaExpresiones(empty);
 
             // Borramos los datos existentes en la lista de regexps
             int filas = model.getRowCount();
@@ -326,26 +341,26 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
             // Insertamos las expresiones recibidas
-            for (int i = 0; i < result.length; ++i) {
-                HashMap<?, ?> map = (HashMap<?, ?>) result[i];
+            for (int i = 0; i < result.getEntriesCount(); ++i) {
+                var entry = result.getEntries(i);
                 Expresion exp = new Expresion(
-                        (String) map.get("nombre"),
-                        (String) map.get("vencimiento"),
-                        (Boolean) map.get("mail"),
-                        (String) map.get("tracker"),
-                        (Integer) map.get("dias"),
-                        (Boolean) map.get("activa"));
+                        entry.getNombre(),
+                        entry.getVencimiento(),
+                        entry.getMail(),
+                        entry.getTracker(),
+                        entry.getDias(),
+                        entry.getActiva());
                 model.addRow(new Object[]{exp.getNombre(), exp.getVencimiento(),
                         exp.isMail(), exp.getTracker(), exp.getDias(), exp.isActiva()});
             }
 
             // Obtenemos el timer y lo colocamos en la app
-            Integer result2 = (Integer) client.execute("rssani.verTimer", params);
-            jLabelTimer.setText(Integer.toString(result2 / 60000) + " min.");
+            IntResponse result2 = stub.verTimer(empty);
+            jLabelTimer.setText(Integer.toString(result2.getValue() / 60000) + " min.");
 
             // Obtenemos el ultimo get del RSS
-            String result3 = (String) client.execute("rssani.verUltimo", params);
-            String valores[] = result3.split(" ");
+            StringResponse result3 = stub.verUltimo(empty);
+            String valores[] = result3.getValue().split(" ");
             jLabelUltimoFecha.setText(valores[0]);
             jLabelUltimoHora.setText(valores[1]);
 
@@ -372,16 +387,16 @@ public class RaX2View extends javax.swing.JFrame {
             // Guardamos el ultimo item conectado
             propiedades.put("lastItem", jComboBoxIP.getEditor().getItem().toString());
 
-            Object[] result4 = (Object[]) client.execute("rssani.listaAuths", params);
+            AuthListResponse result4 = stub.listaAuths(empty);
 
             trackers = new Vector<String>();
-            for (int i = 0; i < result4.length; ++i) {
-                HashMap<?, ?> map = (HashMap<?, ?>) result4[i];
+            for (int i = 0; i < result4.getEntriesCount(); ++i) {
+                var entry = result4.getEntries(i);
                 TrackerAuth auth = new TrackerAuth(
-                        (String) map.get("tracker"),
-                        (String) map.get("uid"),
-                        (String) map.get("pass"),
-                        (String) map.get("passkey"));
+                        entry.getTracker(),
+                        entry.getUid(),
+                        entry.getPass(),
+                        entry.getPasskey());
                 String tracker = auth.getTracker();
                 if (!trackers.contains(tracker)) {
                     trackers.add(tracker);
@@ -390,11 +405,11 @@ public class RaX2View extends javax.swing.JFrame {
 
             exito = true;
             estadoBotones(true);
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showConnectionError(this, ex);
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showConnectionError(this, ex);
             Desconectar();
-        } catch (MalformedURLException ex2) {
-            JOptionPane.showMessageDialog(this, ex2, "ola?", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex2) {
+            JOptionPane.showMessageDialog(this, "Invalid port number", "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (exito) {
                 return 0;
@@ -412,8 +427,6 @@ public class RaX2View extends javax.swing.JFrame {
         jLabelTimer.setText("N/A");
         jLabelUltimoFecha.setText("N/A");
         jLabelUltimoHora.setText("N/A");
-        config = new XmlRpcClientConfigImpl();
-        client.setConfig(config);
         estadoBotones(false);
     }
 
@@ -787,10 +800,6 @@ public class RaX2View extends javax.swing.JFrame {
 
     private void jButtonKillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonKillActionPerformed
         Boolean result = false;
-        // Vemos si existe la configuracion
-        if (config.getServerURL() == null) {
-            return;
-        }
 
         // Preguntamos como tito bill
         int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to kill rssani?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
@@ -798,16 +807,15 @@ public class RaX2View extends javax.swing.JFrame {
             return;
         }
 
-        // Hacemos la llamada xmlrpc
+        // Hacemos la llamada gRPC
         try {
-            Object[] params = new Object[0];
-            result = (Boolean) client.execute("rssani.shutdown", params);
+            result = stub.shutdown(EmptyRequest.getDefaultInstance()).getValue();
 
             if (!result) {
                 JOptionPane.showMessageDialog(this, "Could not stop", "Error", JOptionPane.WARNING_MESSAGE);
             }
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         } finally {
             if (result) {
                 jToggleButtonConnect.setSelected(false);
@@ -817,28 +825,18 @@ public class RaX2View extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonKillActionPerformed
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
-        if (config.getServerURL() == null) {
-            return;
-        }
-
         try {
-            Object[] params = new Object[0];
-            Boolean result = (Boolean) client.execute("rssani.guardar", params);
+            Boolean result = stub.guardar(EmptyRequest.getDefaultInstance()).getValue();
 
             if (!result) {
                 JOptionPane.showMessageDialog(this, "Could not save", "Error", JOptionPane.WARNING_MESSAGE);
             }
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
     private void jButtonEditActionPerformed(java.awt.event.ActionEvent evt) {
-        // Vemos si existe la configuracion
-        if (config.getServerURL() == null) {
-            return;
-        }
-
         if (jTable1.getSelectedRow() == -1) {
             return;
         }
@@ -857,11 +855,14 @@ public class RaX2View extends javax.swing.JFrame {
             return;
         }
 
-        // Hacemos la llamada xmlrpc con las dos cadenas
+        // Hacemos la llamada gRPC con las dos cadenas
         try {
-            Object[] params = new Object[]{filaOrig, cadDest};
+            EditarRegexpIRequest request = EditarRegexpIRequest.newBuilder()
+                    .setRegexpOrig(filaOrig)
+                    .setRegexpDest(cadDest)
+                    .build();
 
-            Boolean result = (Boolean) client.execute("rssani.editarRegexpI", params);
+            Boolean result = stub.editarRegexpI(request).getValue();
 
             if (result) {
                 JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
@@ -869,17 +870,12 @@ public class RaX2View extends javax.swing.JFrame {
                 Conectar(); // Refrescamos desde el servidor
             }
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
     private void jButtonActDesActionPerformed(java.awt.event.ActionEvent evt) {
-        // Vemos si existe la configuracion
-        if (config.getServerURL() == null) {
-            return;
-        }
-
         if (jTable1.getSelectedRow() == -1) {
             return;
         }
@@ -891,11 +887,13 @@ public class RaX2View extends javax.swing.JFrame {
             return;
         }
 
-        // Hacemos la llamada xmlrpc con las dos cadenas
+        // Hacemos la llamada gRPC
         try {
-            Object[] params = new Object[]{filaOrig};
+            ActivarRegexpRequest request = ActivarRegexpRequest.newBuilder()
+                    .setRegexpOrig(filaOrig)
+                    .build();
 
-            Boolean result = (Boolean) client.execute("rssani.activarRegexp", params);
+            Boolean result = stub.activarRegexp(request).getValue();
 
             if (result) {
                 JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
@@ -903,17 +901,12 @@ public class RaX2View extends javax.swing.JFrame {
                 Conectar(); // Refrescamos desde el servidor
             }
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
-        // Vemos si existe la configuracion
-        if (config.getServerURL() == null) {
-            return;
-        }
-
         // Dialogo para la nueva regexp
         String cadena = JOptionPane.showInputDialog("Enter the RegExp to add");
         if (cadena == null || cadena.equals("")) {
@@ -929,7 +922,7 @@ public class RaX2View extends javax.swing.JFrame {
         // Dialogo para solo mail
         int mail = JOptionPane.showConfirmDialog(this, "Email only?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
 
-        boolean bmail = mail == 0 ? true : false;
+        boolean bmail = mail == 0;
 
         // Dialogo para el tracker
         String tracker = (String) JOptionPane.showInputDialog(this, "Enter the tracker (host only)", "Tracker", JOptionPane.DEFAULT_OPTION, null, trackers.toArray(), null);
@@ -945,19 +938,25 @@ public class RaX2View extends javax.swing.JFrame {
 
         int ndias = Integer.parseInt(dias);
 
-        // Creamos la xmlrpc con los tres parametros
+        // Creamos la llamada gRPC con los parametros
         try {
-            Object[] params = new Object[]{cadena, vencimiento, bmail, tracker,ndias};
+            AnadirRegexpRequest request = AnadirRegexpRequest.newBuilder()
+                    .setNombre(cadena)
+                    .setFecha(vencimiento)
+                    .setMail(bmail)
+                    .setTracker(tracker)
+                    .setDias(ndias)
+                    .build();
 
-            Boolean result = (Boolean) client.execute("rssani.anadirRegexp", params);
+            Boolean result = stub.anadirRegexp(request).getValue();
 
             if (result) {
                 Conectar(); // Refrescamos
 
             }
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonAddActionPerformed
 
@@ -968,9 +967,12 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         try { // Lo movemos a una posicion menos
-            Object[] params = new Object[]{orig, orig - 1};
+            MoverRegexpRequest request = MoverRegexpRequest.newBuilder()
+                    .setFromPosition(orig)
+                    .setTo(orig - 1)
+                    .build();
 
-            Boolean result = (Boolean) client.execute("rssani.moverRegexp", params);
+            Boolean result = stub.moverRegexp(request).getValue();
 
             if (!result) {
                 JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
@@ -978,8 +980,8 @@ public class RaX2View extends javax.swing.JFrame {
                 Conectar();
             }
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonUpActionPerformed
 
@@ -990,9 +992,12 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         try { // Lo movemos a una posicion mas
-            Object[] params = new Object[]{orig, orig + 1};
+            MoverRegexpRequest request = MoverRegexpRequest.newBuilder()
+                    .setFromPosition(orig)
+                    .setTo(orig + 1)
+                    .build();
 
-            Boolean result = (Boolean) client.execute("rssani.moverRegexp", params);
+            Boolean result = stub.moverRegexp(request).getValue();
 
             if (!result) {
                 JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
@@ -1000,26 +1005,18 @@ public class RaX2View extends javax.swing.JFrame {
                 Conectar();
             }
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonDownActionPerformed
 
     private void jButtonLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLogActionPerformed
-        if (config.getServerURL() == null) {
-            return;
-        }
-
-        log = new Log(client);
+        log = new Log(stub);
         log.setLocationRelativeTo(this);
         log.setVisible(true);
     }//GEN-LAST:event_jButtonLogActionPerformed
 
     private void jButtonRemoveActionPerformed(java.awt.event.ActionEvent evt) {
-        if (config.getServerURL() == null) {
-            return;
-        }
-
         if (jTable1.getSelectedRow() == -1) {
             return;
         }
@@ -1031,15 +1028,17 @@ public class RaX2View extends javax.swing.JFrame {
         }
         try {
             // Borro la regexp por el nombre
-            Object[] params = new Object[]{jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0)};
-            Boolean result = (Boolean) client.execute("rssani.borrarRegexpS", params);
+            BorrarRegexpSRequest request = BorrarRegexpSRequest.newBuilder()
+                    .setNombre(jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0).toString())
+                    .build();
+            Boolean result = stub.borrarRegexpS(request).getValue();
 
             if (result) {
                 Conectar();
             }
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
@@ -1049,7 +1048,7 @@ private void jButtonOpcionesActionPerformed(java.awt.event.ActionEvent evt) {//G
         @Override
         synchronized public void run() {
             // Creo el dialogo de opciones con sus cosas
-            Opciones opc = new Opciones(propiedades, client, jComboBoxIP.getSelectedItem().toString());
+            Opciones opc = new Opciones(propiedades, stub, jComboBoxIP.getSelectedItem().toString());
             opc.setLocationRelativeTo(null);
             opc.setVisible(true);
 
@@ -1104,7 +1103,7 @@ private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {/
 }//GEN-LAST:event_jButtonBorrarHostActionPerformed
 
 private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTrackersActionPerformed
-    Trackers trk = new Trackers(client);
+    Trackers trk = new Trackers(stub);
     trk.setLocationRelativeTo(this);
     trk.setVisible(true);
 }//GEN-LAST:event_jButtonTrackersActionPerformed

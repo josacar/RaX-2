@@ -10,11 +10,15 @@
  */
 package rax2;
 
-import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
+import io.grpc.StatusRuntimeException;
+import rax2.proto.RssaniServiceGrpc;
+import rax2.proto.EmptyRequest;
+import rax2.proto.AuthListResponse;
+import rax2.proto.AnadirAuthRequest;
+import rax2.proto.BorrarAuthRequest;
+import rax2.proto.BoolResponse;
 
 /**
  * Tracker authentication management dialog.
@@ -22,37 +26,36 @@ import org.apache.xmlrpc.client.XmlRpcClient;
  */
 public class Trackers extends javax.swing.JFrame {
 
-    /** XML-RPC client for server communication. */
-    private XmlRpcClient _client;
+    /** gRPC stub for server communication. */
+    private RssaniServiceGrpc.RssaniServiceBlockingStub _stub;
     /** Table model for tracker credentials. */
     private DefaultTableModel model;
 
     /**
      * Creates new form Trackers.
-     * @param client the XML-RPC client for server communication
+     * @param stub the gRPC blocking stub for server communication
      */
-    public Trackers(XmlRpcClient client) {
+    public Trackers(RssaniServiceGrpc.RssaniServiceBlockingStub stub) {
         initComponents();
         tablaRegexp.getColumnModel().getColumn(1).setMinWidth(60);
         tablaRegexp.getColumnModel().getColumn(1).setMaxWidth(60);
-        _client = client;
+        _stub = stub;
         try {
-            Object[] params = new Object[]{};
+            EmptyRequest empty = EmptyRequest.getDefaultInstance();
+            AuthListResponse result = _stub.listaAuths(empty);
 
-            Object[] result = (Object[]) _client.execute("rssani.listaAuths", params);
-
-            for (int i = 0; i < result.length; ++i) {
-                HashMap<?, ?> map = (HashMap<?, ?>) result[i];
+            for (int i = 0; i < result.getEntriesCount(); ++i) {
+                var entry = result.getEntries(i);
                 TrackerAuth auth = new TrackerAuth(
-                        (String) map.get("tracker"),
-                        (String) map.get("uid"),
-                        (String) map.get("pass"),
-                        (String) map.get("passkey"));
+                        entry.getTracker(),
+                        entry.getUid(),
+                        entry.getPass(),
+                        entry.getPasskey());
                 model.addRow(new Object[]{auth.getTracker(), auth.getUid(), auth.getPass(), auth.getPasskey()});
             }
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
@@ -160,13 +163,16 @@ public class Trackers extends javax.swing.JFrame {
             return;
         }
         try {
-            Object[] params = new Object[]{tablaRegexp.getModel().getValueAt(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()), 0)};
-            Boolean result = (Boolean) _client.execute("rssani.borrarAuth", params);
+            String tracker = tablaRegexp.getModel().getValueAt(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()), 0).toString();
+            BorrarAuthRequest request = BorrarAuthRequest.newBuilder()
+                    .setTracker(tracker)
+                    .build();
+            _stub.borrarAuth(request);
 
             model.removeRow(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()));
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
 }//GEN-LAST:event_jButtonBorrarActionPerformed
 
@@ -196,16 +202,21 @@ public class Trackers extends javax.swing.JFrame {
         if (passkey == null) {
             return;
         }
-        // Creamos la xmlrpc con los cuatro parametros
+        // Creamos la llamada gRPC con los cuatro parametros
         try {
-            Object[] params = new Object[]{tracker, uid, pass, passkey};
+            AnadirAuthRequest request = AnadirAuthRequest.newBuilder()
+                    .setTracker(tracker)
+                    .setUid(uid)
+                    .setPassword(pass)
+                    .setPasskey(passkey)
+                    .build();
 
-            Boolean result = (Boolean) _client.execute("rssani.anadirAuth", params);
+            _stub.anadirAuth(request);
 
-            model.addRow(new Object[]{tracker, uid, pass});
+            model.addRow(new Object[]{tracker, uid, pass, passkey});
 
-        } catch (XmlRpcException ex) {
-            XmlRpcErrorHandler.showErrorMessage(this, ex, "Error");
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }//GEN-LAST:event_jButtonAnadirActionPerformed
     /*

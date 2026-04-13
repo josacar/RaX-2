@@ -43,3 +43,6 @@ run = """
 mkdir -p lib/apache-xmlrpc lib/flatlaf
 mvn dependency:copy-dependencies -DoutputDirectory=lib/
 """
+
+[tools]
+maven = "3"
