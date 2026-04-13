@@ -471,7 +471,7 @@ public class RaX2View extends javax.swing.JFrame {
         jLabel2.setText("IP"); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
 
-        jTextFieldPort.setText(""); // NOI18N
+        jTextFieldPort.setText("50051"); // NOI18N
         jTextFieldPort.setName("jTextFieldPort"); // NOI18N
 
         jLabel3.setText("Port"); // NOI18N
