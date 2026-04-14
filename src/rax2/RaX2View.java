@@ -387,21 +387,7 @@ public class RaX2View extends javax.swing.JFrame {
             // Guardamos el ultimo item conectado
             propiedades.put("lastItem", jComboBoxIP.getEditor().getItem().toString());
 
-            AuthListResponse result4 = stub.listaAuths(empty);
-
-            trackers = new Vector<String>();
-            for (int i = 0; i < result4.getEntriesCount(); ++i) {
-                var entry = result4.getEntries(i);
-                TrackerAuth auth = new TrackerAuth(
-                        entry.getTracker(),
-                        entry.getUid(),
-                        entry.getPass(),
-                        entry.getPasskey());
-                String tracker = auth.getTracker();
-                if (!trackers.contains(tracker)) {
-                    trackers.add(tracker);
-                }
-            }
+            refreshTrackers();
 
             exito = true;
             estadoBotones(true);
@@ -907,6 +893,14 @@ public class RaX2View extends javax.swing.JFrame {
     }
 
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
+        // Refresh trackers from server to ensure we have the latest list
+        try {
+            refreshTrackers();
+        } catch (StatusRuntimeException ex) {
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error refreshing trackers");
+            return;
+        }
+
         // Dialogo para la nueva regexp
         String cadena = JOptionPane.showInputDialog("Enter the RegExp to add");
         if (cadena == null || cadena.equals("")) {
@@ -1170,4 +1164,26 @@ private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//G
     /** Main content panel. */
     private javax.swing.JPanel mainPanel;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * Refreshes the trackers list from the server.
+     * @throws StatusRuntimeException if the gRPC call fails
+     */
+    private void refreshTrackers() throws StatusRuntimeException {
+        EmptyRequest empty = EmptyRequest.newBuilder().build();
+        AuthListResponse result4 = stub.listaAuths(empty);
+        trackers = new Vector<String>();
+        for (int i = 0; i < result4.getEntriesCount(); ++i) {
+            var entry = result4.getEntries(i);
+            TrackerAuth auth = new TrackerAuth(
+                    entry.getTracker(),
+                    entry.getUid(),
+                    entry.getPass(),
+                    entry.getPasskey());
+            String tracker = auth.getTracker();
+            if (!trackers.contains(tracker)) {
+                trackers.add(tracker);
+            }
+        }
+    }
 }
