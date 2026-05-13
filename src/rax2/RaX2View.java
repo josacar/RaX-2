@@ -200,6 +200,7 @@ public class RaX2View extends javax.swing.JFrame {
 
     }
 
+    @SuppressWarnings("unchecked")
     /**
      * Creates new main application frame.
      * Initializes gRPC channel, loads saved hosts from preferences,
@@ -318,6 +319,7 @@ public class RaX2View extends javax.swing.JFrame {
         jTextFieldFiltro.setEditable(estado);
     }
 
+    @SuppressWarnings("unchecked")
     private int Conectar() {
         Boolean exito = false;
         try {
