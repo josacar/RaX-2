@@ -314,7 +314,7 @@ public class RaX2View extends javax.swing.JFrame {
 
     @SuppressWarnings("unchecked")
     private int Conectar() {
-        Boolean exito = false;
+        boolean success = false;
         try {
             // Build gRPC channel for the selected host
             String host = jComboBoxIP.getSelectedItem().toString();
@@ -340,8 +340,8 @@ public class RaX2View extends javax.swing.JFrame {
             RegexpListResponse result = stub.listaExpresiones(empty);
 
             // Borramos los datos existentes en la lista de regexps
-            int filas = model.getRowCount();
-            for (int i = 0; i < filas; ++i) {
+            int rowCount = model.getRowCount();
+            for (int i = 0; i < rowCount; ++i) {
                 model.removeRow(0);
             }
 
@@ -360,29 +360,27 @@ public class RaX2View extends javax.swing.JFrame {
             }
 
             // Obtenemos el timer y lo colocamos en la app
-            IntResponse result2 = stub.verTimer(empty);
-            jLabelTimer.setText(Integer.toString(result2.getValue() / 60000) + " min.");
+            IntResponse timerResult = stub.verTimer(empty);
+            jLabelTimer.setText(Integer.toString(timerResult.getValue() / 60000) + " min.");
 
             // Obtenemos el ultimo get del RSS
-            StringResponse result3 = stub.verUltimo(empty);
-            String[] valores = result3.getValue().split(" ");
+            StringResponse lastUpdateResult = stub.verUltimo(empty);
+            String[] valores = lastUpdateResult.getValue().split(" ");
             jLabelUltimoFecha.setText(valores[0]);
             jLabelUltimoHora.setText(valores[1]);
 
             // Obtenemos el item para ver si estaba en la lista
             String item = jComboBoxIP.getEditor().getItem().toString();
-            boolean encontrado = false;
-
-            // Miramos si el elemento estaba ya en la lista
+            boolean found = false;
+            // Check if the item already exists in the list
             for (int i = 0; i < jComboBoxIP.getModel().getSize(); ++i) {
                 if (item.equals(jComboBoxIP.getModel().getElementAt(i))) {
-                    encontrado = true;
+                    found = true;
                     break;
                 }
             }
-
-            // Si no estaba lo añadimos al combo y lo guardamos
-            if (!encontrado) {
+            // Add new item if not found
+            if (!found) {
                 jComboBoxIP.addItem((String) jComboBoxIP.getEditor().getItem());
                 items++;
                 propiedades.putInt("items", items);
@@ -394,15 +392,15 @@ public class RaX2View extends javax.swing.JFrame {
 
             refreshTrackers();
 
-            exito = true;
-            estadoBotones(true);
+        success = true;
+        estadoBotones(true);
         } catch (StatusRuntimeException ex) {
             GrpcErrorHandler.showConnectionError(this, ex);
             Desconectar();
-        } catch (NumberFormatException ex2) {
+        } catch (NumberFormatException numberFormatException) {
             JOptionPane.showMessageDialog(this, "Invalid port number", "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
-            if (exito) {
+            if (success) {
                 return 0;
             } else {
                 return -1;
@@ -411,8 +409,8 @@ public class RaX2View extends javax.swing.JFrame {
     }
 
     private void Desconectar() {
-        int filas = model.getRowCount();
-        for (int i = 0; i < filas; ++i) {
+        int rowCount = model.getRowCount();
+        for (int i = 0; i < rowCount; ++i) {
             model.removeRow(0);
         }
         jLabelTimer.setText("N/A");
@@ -615,11 +613,11 @@ public class RaX2View extends javax.swing.JFrame {
         model.addColumn("Days");
         model.addColumn("Active");
         jTable1.setModel(model);
-        javax.swing.table.TableColumn var_col = jTable1.getColumnModel().getColumn(2);
-        javax.swing.table.TableColumn var_col2 = jTable1.getColumnModel().getColumn(5);
-        final JCheckBox check = new JCheckBox();
-        var_col.setCellEditor(new DefaultCellEditor(check));
-        var_col2.setCellEditor(new DefaultCellEditor(check));
+        javax.swing.table.TableColumn mailColumn = jTable1.getColumnModel().getColumn(2);
+        javax.swing.table.TableColumn activeColumn = jTable1.getColumnModel().getColumn(5);
+        final JCheckBox checkboxRenderer = new JCheckBox();
+        mailColumn.setCellEditor(new DefaultCellEditor(checkboxRenderer));
+        activeColumn.setCellEditor(new DefaultCellEditor(checkboxRenderer));
         sorter = new TableRowSorter<TableModel>(jTable1.getModel());
         jTable1.setRowSorter(sorter);
         jTable1.setAlignmentX(1.0F);
@@ -814,7 +812,7 @@ public class RaX2View extends javax.swing.JFrame {
                     try {
                         sorter.setRowFilter(
                             RowFilter.regexFilter("(?i)" + text));
-                    } catch (PatternSyntaxException pse) {
+                    } catch (PatternSyntaxException patternException) {
                         System.err.println("Bad regex pattern");
                     }
                 }
@@ -832,8 +830,8 @@ public class RaX2View extends javax.swing.JFrame {
         Boolean result = false;
 
         // Preguntamos como tito bill
-        int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to kill rssani?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
-        if (si == 1) {
+        int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to kill rssani?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
+        if (confirmation == 1) {
             return;
         }
 
@@ -871,25 +869,22 @@ public class RaX2View extends javax.swing.JFrame {
             return;
         }
 
-        // Cojo la 1 columna
-        String cadOrig = (String) jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0);
-        int filaOrig = -1;
-        filaOrig = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
-        if (filaOrig == -1) {
+        String currentRegex = (String) jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0);
+        int selectedModelRow = -1;
+        selectedModelRow = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
+        if (selectedModelRow == -1) {
             return;
         }
 
-        // Dialogo de edicion de la regexp
-        String cadDest = JOptionPane.showInputDialog(this, "Enter the new RegExp", cadOrig);
-        if (cadDest == null || cadDest.equals("")) {
+        String newRegex = JOptionPane.showInputDialog(this, "Enter the new RegExp", currentRegex);
+        if (newRegex == null || newRegex.equals("")) {
             return;
         }
 
-        // Hacemos la llamada gRPC con las dos cadenas
         try {
             EditarRegexpIRequest request = EditarRegexpIRequest.newBuilder()
-                    .setRegexpOrig(filaOrig)
-                    .setRegexpDest(cadDest)
+                    .setRegexpOrig(selectedModelRow)
+                    .setRegexpDest(newRegex)
                     .build();
 
             Boolean result = stub.editarRegexpI(request).getValue();
@@ -910,17 +905,15 @@ public class RaX2View extends javax.swing.JFrame {
             return;
         }
 
-        // Cojo la 1 columna
-        int filaOrig = -1;
-        filaOrig = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
-        if (filaOrig == -1) {
+        int selectedModelRow = -1;
+        selectedModelRow = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
+        if (selectedModelRow == -1) {
             return;
         }
 
-        // Hacemos la llamada gRPC
         try {
             ActivarRegexpRequest request = ActivarRegexpRequest.newBuilder()
-                    .setRegexpOrig(filaOrig)
+                    .setRegexpOrig(selectedModelRow)
                     .build();
 
             Boolean result = stub.activarRegexp(request).getValue();
@@ -946,8 +939,8 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Dialogo para la nueva regexp
-        String cadena = JOptionPane.showInputDialog(this, "Enter the RegExp to add");
-        if (cadena == null || cadena.equals("")) {
+        String regexPattern = JOptionPane.showInputDialog(this, "Enter the RegExp to add");
+        if (regexPattern == null || regexPattern.equals("")) {
             return;
         }
 
@@ -960,7 +953,7 @@ public class RaX2View extends javax.swing.JFrame {
         // Dialogo para solo mail
         int mail = JOptionPane.showConfirmDialog(this, "Email only?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
 
-        boolean bmail = mail == 0;
+        boolean emailOnly = mail == 0;
 
         // Dialogo para el tracker
         String tracker = (String) JOptionPane.showInputDialog(this, "Enter the tracker (host only)", "Tracker", JOptionPane.DEFAULT_OPTION, null, trackers.toArray(), null);
@@ -974,16 +967,16 @@ public class RaX2View extends javax.swing.JFrame {
             return;
         }
 
-        int ndias = Integer.parseInt(dias);
+        int daysCount = Integer.parseInt(dias);
 
         // Creamos la llamada gRPC con los parametros
         try {
             AnadirRegexpRequest request = AnadirRegexpRequest.newBuilder()
-                    .setNombre(cadena)
+                    .setNombre(regexPattern)
                     .setFecha(vencimiento)
-                    .setMail(bmail)
+                    .setMail(emailOnly)
                     .setTracker(tracker)
-                    .setDias(ndias)
+                    .setDias(daysCount)
                     .build();
 
             Boolean result = stub.anadirRegexp(request).getValue();
@@ -999,15 +992,15 @@ public class RaX2View extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonAddActionPerformed
 
     private void jButtonUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpActionPerformed
-        int orig = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
-        if (orig <= 0) {
+        int selectedModelRow = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
+        if (selectedModelRow <= 0) {
             return; // Si esta la primera abortamos
         }
 
         try { // Lo movemos a una posicion menos
             MoverRegexpRequest request = MoverRegexpRequest.newBuilder()
-                    .setFromPosition(orig)
-                    .setTo(orig - 1)
+                    .setFromPosition(selectedModelRow)
+                    .setTo(selectedModelRow - 1)
                     .build();
 
             Boolean result = stub.moverRegexp(request).getValue();
@@ -1024,15 +1017,15 @@ public class RaX2View extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonUpActionPerformed
 
     private void jButtonDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownActionPerformed
-        int orig = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
-        if (orig >= jTable1.getModel().getRowCount() - 1 || orig < 0) {
+        int selectedModelRow = jTable1.convertRowIndexToModel(jTable1.getSelectedRow());
+        if (selectedModelRow >= jTable1.getModel().getRowCount() - 1 || selectedModelRow < 0) {
             return; // Si esta al final abortamos
         }
 
         try { // Lo movemos a una posicion mas
             MoverRegexpRequest request = MoverRegexpRequest.newBuilder()
-                    .setFromPosition(orig)
-                    .setTo(orig + 1)
+                    .setFromPosition(selectedModelRow)
+                    .setTo(selectedModelRow + 1)
                     .build();
 
             Boolean result = stub.moverRegexp(request).getValue();
@@ -1060,8 +1053,8 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Pregunto antes
-        int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0) + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
-        if (si == 1) {
+        int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + jTable1.getModel().getValueAt(jTable1.convertRowIndexToModel(jTable1.getSelectedRow()), 0) + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
+        if (confirmation == 1) {
             return;
         }
         try {
@@ -1085,9 +1078,9 @@ private void jButtonOpcionesActionPerformed(java.awt.event.ActionEvent evt) {//G
 
         @Override
         synchronized public void run() {
-            Opciones opc = new Opciones(RaX2View.this, propiedades, stub, jComboBoxIP.getSelectedItem().toString());
-            opc.setLocationRelativeTo(RaX2View.this);
-            opc.setVisible(true);
+            Opciones optionsDialog = new Opciones(RaX2View.this, propiedades, stub, jComboBoxIP.getSelectedItem().toString());
+            optionsDialog.setLocationRelativeTo(RaX2View.this);
+            optionsDialog.setVisible(true);
 
         }
     });
@@ -1108,8 +1101,8 @@ private void jToggleButtonConnectActionPerformed(java.awt.event.ActionEvent evt)
 
 private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBorrarHostActionPerformed
     // Eliminamos la ip con su config
-    int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + jComboBoxIP.getSelectedItem() + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
-    if (si == 1) {
+    int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + jComboBoxIP.getSelectedItem() + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
+    if (confirmation == 1) {
         return;
     }
 
@@ -1122,15 +1115,15 @@ private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {/
         jComboBoxIP.removeItem(jComboBoxIP.getSelectedItem());
     }
 
-    boolean cent = false;
+    boolean isShifting = false;
 
     for (int i = 1; i <= items; i++) { // Recorro los items
         if (propiedades.get("item" + i, "ERROR").equals(host)) {
             propiedades.remove("item" + i); // Quito el item
-            cent = true;
+            isShifting = true;
             continue;
         }
-        if (cent) { // Muevo los items siguientes a una posicion menos
+        if (isShifting) { // Muevo los items siguientes a una posicion menos
             propiedades.put("item" + (i - 1), propiedades.get("item" + i, "ERROR"));
             propiedades.remove("item" + i);
         }
@@ -1149,9 +1142,9 @@ private void jButtonAddServerActionPerformed(java.awt.event.ActionEvent evt) {
     }
 
 private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTrackersActionPerformed
-    Trackers trk = new Trackers(this, stub);
-    trk.setLocationRelativeTo(this);
-    trk.setVisible(true);
+    Trackers trackersDialog = new Trackers(this, stub);
+    trackersDialog.setLocationRelativeTo(this);
+    trackersDialog.setVisible(true);
 }//GEN-LAST:event_jButtonTrackersActionPerformed
 
     private void jComboBoxIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxIPActionPerformed
@@ -1225,10 +1218,10 @@ private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//G
      */
     private void refreshTrackers() throws StatusRuntimeException {
         EmptyRequest empty = EmptyRequest.newBuilder().build();
-        AuthListResponse result4 = stub.listaAuths(empty);
+        AuthListResponse authListResult = stub.listaAuths(empty);
         trackers = new ArrayList<String>();
-        for (int i = 0; i < result4.getEntriesCount(); ++i) {
-            var entry = result4.getEntries(i);
+        for (int i = 0; i < authListResult.getEntriesCount(); ++i) {
+            var entry = authListResult.getEntries(i);
             TrackerAuth auth = new TrackerAuth(
                     entry.getTracker(),
                     entry.getUid(),

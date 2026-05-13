@@ -36,12 +36,12 @@ class DateRenderer extends DefaultTableCellRenderer {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
         Date fecha = (Date) value;
-        NumberFormat nf = NumberFormat.getInstance();
-        nf.setMinimumIntegerDigits(2);
+        NumberFormat numberFormatter = NumberFormat.getInstance();
+        numberFormatter.setMinimumIntegerDigits(2);
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(fecha);
 
-        setText(nf.format(calendar.get(Calendar.DAY_OF_MONTH)) + "/" + nf.format(calendar.get(Calendar.MONTH) + 1) + " " + nf.format(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + nf.format(calendar.get(Calendar.MINUTE)));
+        setText(numberFormatter.format(calendar.get(Calendar.DAY_OF_MONTH)) + "/" + numberFormatter.format(calendar.get(Calendar.MONTH) + 1) + " " + numberFormatter.format(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + numberFormatter.format(calendar.get(Calendar.MINUTE)));
         return this;
     }
 }
@@ -52,14 +52,14 @@ public class Log extends javax.swing.JDialog {
 
         JScrollBar verticalScrollBar;
 
-        MyAdjustmentListener(JScrollBar v) {
-            verticalScrollBar = v;
+        MyAdjustmentListener(JScrollBar scrollBar) {
+            verticalScrollBar = scrollBar;
         }
 
         @Override
         public void adjustmentValueChanged(AdjustmentEvent e) {
-            String aux;
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            String logLine;
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
             DefaultTableModel model = (DefaultTableModel) getJTable1().getModel();
             if (e.getValue() == (verticalScrollBar.getMaximum() - verticalScrollBar.getVisibleAmount()) || verticalScrollBar.getMaximum() == verticalScrollBar.getVisibleAmount()) {
@@ -71,11 +71,11 @@ public class Log extends javax.swing.JDialog {
                             .setIni(offset)
                             .setFin(offset + 20)
                             .build();
-                    LogResponse result = _stub.verLog(request);
+                    LogResponse result = stub.verLog(request);
                     for (int i = 0; i < result.getLinesCount(); ++i) {
-                        aux = result.getLines(i);
-                        java.util.Date fecha = sdf.parse(aux.split("[|]")[0].substring(2));
-                        model.addRow(new Object[]{fecha, aux.split("[|]")[1]});
+                        logLine = result.getLines(i);
+                        java.util.Date fecha = dateFormatter.parse(logLine.split("[|]")[0].substring(2));
+                        model.addRow(new Object[]{fecha, logLine.split("[|]")[1]});
                     }
                     offset += 20;
                     max = e.getValue();
@@ -89,14 +89,14 @@ public class Log extends javax.swing.JDialog {
     }
     JScrollBar verticalScrollBar;
     JScrollBar horizontalScrollBar;
-    private RssaniServiceGrpc.RssaniServiceBlockingStub _stub;
+    private RssaniServiceGrpc.RssaniServiceBlockingStub stub;
     int offset = 20;
     int max = 0;
 
     public Log(java.awt.Frame parent, RssaniServiceGrpc.RssaniServiceBlockingStub stub) {
         super(parent, true);
         initComponents();
-        _stub = stub;
+        this.stub = stub;
         verticalScrollBar = jScrollPaneLog.getVerticalScrollBar();
         horizontalScrollBar = jScrollPaneLog.getHorizontalScrollBar();
         jTable1.getColumnModel().getColumn(0).setMinWidth(90);
@@ -107,24 +107,24 @@ public class Log extends javax.swing.JDialog {
                     .setIni(0)
                     .setFin(20)
                     .build();
-            final LogResponse result = _stub.verLog(request);
+            final LogResponse result = stub.verLog(request);
             java.awt.EventQueue.invokeLater(new Runnable() {
 
                 DefaultTableModel model;
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
                 @Override
                 synchronized public void run() {
 
                     verticalScrollBar.addAdjustmentListener(new MyAdjustmentListener(verticalScrollBar));
                     model = (DefaultTableModel) jTable1.getModel();
-                    String aux;
+                    String logLine;
 
                     for (int i = 0; i < result.getLinesCount(); ++i) {
                         try {
-                            aux = result.getLines(i);
-                            java.util.Date fecha = sdf.parse(aux.split("[|]")[0].substring(2));
-                            model.addRow(new Object[]{fecha, aux.split("[|]")[1]});
+                            logLine = result.getLines(i);
+                            java.util.Date fecha = dateFormatter.parse(logLine.split("[|]")[0].substring(2));
+                            model.addRow(new Object[]{fecha, logLine.split("[|]")[1]});
                         } catch (ParseException ex) {
                             Logger.getLogger(RaX2View.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -227,7 +227,7 @@ public class Log extends javax.swing.JDialog {
                         try {
                             sorter.setRowFilter(
                                 RowFilter.regexFilter("(?i)" + text));
-                        } catch (PatternSyntaxException pse) {
+                        } catch (PatternSyntaxException patternException) {
                             System.err.println("Bad regex pattern");
                         }
                     }

@@ -27,17 +27,17 @@ final class GrpcErrorHandler {
     }
 
     static void showConnectionError(Component parent, StatusRuntimeException ex) {
-        String msg = ex.getStatus().getDescription();
-        if (msg == null) {
-            msg = ex.getStatus().toString();
+        String statusDescription = ex.getStatus().getDescription();
+        if (statusDescription == null) {
+            statusDescription = ex.getStatus().toString();
         }
-        String displayMsg;
+        String displayMessage;
         if (ex.getCause() instanceof ConnectException || ex.getStatus().getCode() == io.grpc.Status.Code.UNAVAILABLE) {
-            displayMsg = "Could not connect to server";
+            displayMessage = "Could not connect to server";
         } else {
-            displayMsg = "Error: " + ex.getStatus().getCode() + " " + msg;
+            displayMessage = "Error: " + ex.getStatus().getCode() + " " + statusDescription;
         }
-        showError(parent, "Connection Error", displayMsg, ex);
+        showError(parent, "Connection Error", displayMessage, ex);
     }
 
     static void showErrorMessage(Component parent, Exception ex, String title) {
@@ -56,9 +56,9 @@ final class GrpcErrorHandler {
 
         panel.add(Box.createVerticalStrut(10));
 
-        StringWriter sw = new StringWriter();
-        ex.printStackTrace(new PrintWriter(sw));
-        JTextArea detailsArea = new JTextArea(sw.toString());
+        StringWriter stringWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(stringWriter));
+        JTextArea detailsArea = new JTextArea(stringWriter.toString());
         detailsArea.setEditable(false);
         detailsArea.setTabSize(2);
 
@@ -80,9 +80,9 @@ final class GrpcErrorHandler {
             }
             panel.revalidate();
             panel.repaint();
-            Window w = javax.swing.SwingUtilities.getWindowAncestor(panel);
-            if (w != null) {
-                w.pack();
+            Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(panel);
+            if (parentWindow != null) {
+                parentWindow.pack();
             }
         });
         toggleButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -93,8 +93,8 @@ final class GrpcErrorHandler {
         JOptionPane.showMessageDialog(parent, panel, title, JOptionPane.ERROR_MESSAGE);
     }
 
-    private static String escapeHtml(String s) {
-        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    private static String escapeHtml(String rawText) {
+        return rawText.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 .replace("\n", "<br>");
     }
 }

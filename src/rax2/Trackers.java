@@ -12,7 +12,7 @@ import rax2.proto.BoolResponse;
 
 public class Trackers extends javax.swing.JDialog {
 
-    private RssaniServiceGrpc.RssaniServiceBlockingStub _stub;
+    private RssaniServiceGrpc.RssaniServiceBlockingStub stub;
     @SuppressWarnings("rawtypes")
     private DefaultTableModel model;
 
@@ -21,10 +21,10 @@ public class Trackers extends javax.swing.JDialog {
         initComponents();
         tablaRegexp.getColumnModel().getColumn(1).setMinWidth(60);
         tablaRegexp.getColumnModel().getColumn(1).setMaxWidth(60);
-        _stub = stub;
+        this.stub = stub;
         try {
             EmptyRequest empty = EmptyRequest.getDefaultInstance();
-            AuthListResponse result = _stub.listaAuths(empty);
+            AuthListResponse result = stub.listaAuths(empty);
 
             for (int i = 0; i < result.getEntriesCount(); ++i) {
                 var entry = result.getEntries(i);
@@ -139,8 +139,8 @@ public class Trackers extends javax.swing.JDialog {
         if (tablaRegexp.getSelectedRow() == -1) {
             return;
         }
-        int si = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + tablaRegexp.getModel().getValueAt(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()), 0) + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
-        if (si == 1) {
+        int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + tablaRegexp.getModel().getValueAt(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()), 0) + "?", "Confirm", javax.swing.JOptionPane.YES_NO_OPTION);
+        if (confirmation == 1) {
             return;
         }
         try {
@@ -148,7 +148,7 @@ public class Trackers extends javax.swing.JDialog {
             BorrarAuthRequest request = BorrarAuthRequest.newBuilder()
                     .setTracker(tracker)
                     .build();
-            _stub.borrarAuth(request);
+            stub.borrarAuth(request);
 
             model.removeRow(tablaRegexp.convertRowIndexToModel(tablaRegexp.getSelectedRow()));
 
@@ -187,7 +187,7 @@ public class Trackers extends javax.swing.JDialog {
                     .setPasskey(passkey)
                     .build();
 
-            _stub.anadirAuth(request);
+            stub.anadirAuth(request);
 
             model.addRow(new Object[]{tracker, uid, pass, passkey});
 

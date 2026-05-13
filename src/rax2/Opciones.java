@@ -13,24 +13,24 @@ import rax2.proto.BoolResponse;
 
 public class Opciones extends javax.swing.JDialog {
 
-    private RssaniServiceGrpc.RssaniServiceBlockingStub _stub;
-    private Preferences _opciones;
-    private String _host;
+    private RssaniServiceGrpc.RssaniServiceBlockingStub stub;
+    private Preferences preferences;
+    private String host;
 
     public Opciones(java.awt.Frame parent, Preferences opciones, RssaniServiceGrpc.RssaniServiceBlockingStub stub, String host) {
         super(parent, true);
         initComponents();
-        _stub = stub;
-        _opciones = opciones;
-        _host = host;
+        this.stub = stub;
+        preferences = opciones;
+        this.host = host;
         iniciaValores();
     }
 
     private void iniciaValores() {
-        if (_stub != null) {
+        if (stub != null) {
             try {
                 EmptyRequest empty = EmptyRequest.getDefaultInstance();
-                OpcionesResponse options = _stub.verOpciones(empty);
+                OpcionesResponse options = stub.verOpciones(empty);
 
                 jTextFieldMailFrom.setText(options.getFromMail());
                 jTextFieldMailTo.setText(options.getToMail());
@@ -39,11 +39,11 @@ public class Opciones extends javax.swing.JDialog {
                 GrpcErrorHandler.showErrorMessage(this, ex, "Error");
             }
         }
-        String user = _opciones.get("rpcUser" + _host, "");
+        String user = preferences.get("rpcUser" + host, "");
         if (!user.equals("")) {
             jTextFieldRpcUser.setText(user);
         }
-        String pass = _opciones.get("rpcPass" + _host, "");
+        String pass = preferences.get("rpcPass" + host, "");
         if (!pass.equals("")) {
             jTextFieldRpcPass.setText(pass);
         }
@@ -271,8 +271,8 @@ public class Opciones extends javax.swing.JDialog {
     }
 
 private void jButtonSaveAuthActionPerformed(java.awt.event.ActionEvent evt) {
-    _opciones.put("rpcUser" + _host, jTextFieldRpcUser.getText());
-    _opciones.put("rpcPass" + _host, new String(jTextFieldRpcPass.getPassword()));
+    preferences.put("rpcUser" + host, jTextFieldRpcUser.getText());
+    preferences.put("rpcPass" + host, new String(jTextFieldRpcPass.getPassword()));
 }
 
 private void jButtonCancelarActionPerformed(java.awt.event.ActionEvent evt) {
@@ -287,7 +287,7 @@ private void jButtonAceptarActionPerformed(java.awt.event.ActionEvent evt) {
                 .setPath(jTextFieldRuta.getText())
                 .build();
 
-        Boolean result = _stub.ponerOpciones(request).getValue();
+        Boolean result = stub.ponerOpciones(request).getValue();
 
         if (!result) {
             JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
@@ -308,7 +308,7 @@ private void jButtonModificarActionPerformed(java.awt.event.ActionEvent evt) {
                 .setPassword(new String(jTextFieldRpcPass.getPassword()))
                 .build();
 
-        Boolean result = _stub.ponerCredenciales(request).getValue();
+        Boolean result = stub.ponerCredenciales(request).getValue();
 
         if (!result) {
             JOptionPane.showMessageDialog(this, "Could not apply changes", "Error", JOptionPane.WARNING_MESSAGE);
