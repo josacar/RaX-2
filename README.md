@@ -45,13 +45,21 @@ java -jar build/libs/RaX2-all.jar
 podman build -t rax2 .
 # or: docker build -t rax2 .
 
-# Run (requires X11 socket + .Xauthority for authentication)
+# Allow local X11 connections
+xhost +local:
+
+# Run
 podman run --rm \
+  --net=host \
+  --ipc=host \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   -v $HOME/.Xauthority:/root/.Xauthority:ro \
   -e XAUTHORITY=/root/.Xauthority \
   rax2
+
+# Revoke X11 access when done
+xhost -local:
 ```
 
 > **Note:** Swing uses X11 internally. On Wayland compositors, XWayland provides the compatibility layer automatically.
