@@ -1,19 +1,22 @@
 # RaX-2 Build & Runtime Dockerfile
-# Uses Maven for dependency management.
+# Uses Gradle for dependency management.
 # RaX-2 is a desktop GUI app — X11 forwarding is required for the GUI.
 # On Wayland compositors (KDE, GNOME), this works via XWayland.
 
 # Build stage
-FROM maven:3-eclipse-temurin-21 AS builder
+FROM gradle:8.12-jdk21 AS builder
 WORKDIR /app
 
-# Copy pom.xml for dependency caching
-COPY pom.xml pom.xml
-RUN mvn dependency:go-offline -B
+# Copy Gradle files for dependency caching
+COPY build.gradle.kts build.gradle.kts
+COPY settings.gradle.kts settings.gradle.kts
+COPY gradle/wrapper/ gradle/wrapper/
+COPY gradlew gradlew
+RUN gradle dependencies --no-daemon || true
 
 # Copy source and build
 COPY src/ /app/src/
-RUN mvn package -DskipTests -B
+RUN gradle build --no-daemon -x test
 
 # Runtime stage
 FROM eclipse-temurin:21-jdk
@@ -24,7 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=builder /app/target/RaX2.jar /app/RaX2.jar
-COPY --from=builder /app/target/lib/ /app/lib/
+COPY --from=builder /app/build/libs/RaX2.jar /app/RaX2.jar
+COPY --from=builder /app/build/lib/ /app/lib/
 
 CMD ["java", "-jar", "/app/RaX2.jar"]

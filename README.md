@@ -23,19 +23,19 @@ RaX-2 is a Swing-based desktop client that provides a graphical interface for ma
 ## Prerequisites
 
 - **Java 21** or higher (JDK)
-- **Maven** (for building)
+- **Gradle** (wrapper included, no separate install needed)
 - **Podman / Docker** (optional, for containerized builds)
 
 ## Building
 
-### Using Maven
+### Using Gradle
 
 ```bash
 # Build the project
-mvn clean package -DskipTests
+./gradlew clean build -x test
 
 # Run the application
-java -jar target/RaX2.jar
+java -jar build/libs/RaX2.jar
 ```
 
 ### Using Docker / Podman
@@ -59,7 +59,7 @@ podman run --rm \
 ## Running
 
 ```bash
-java -jar target/RaX2.jar
+java -jar build/libs/RaX2.jar
 ```
 
 ## Configuration
@@ -90,13 +90,10 @@ RaX-2/
 │   │   └── resources/            # UI icon files (PNGs)
 │   └── main/proto/
 │       └── rssani.proto          # Protocol Buffers service definition
-├── nbproject/                    # NetBeans project configuration (legacy)
-├── build.xml                     # Ant build script (legacy)
-├── pom.xml                       # Maven build configuration
-└── target/                       # Build output
-    ├── classes/
-    ├── generated-sources/        # Auto-generated gRPC/Protobuf code
-    └── RaX2.jar
+├── build.gradle.kts              # Gradle build configuration (Kotlin DSL)
+├── settings.gradle.kts           # Gradle settings
+├── gradle/wrapper/               # Gradle wrapper
+└── Dockerfile                    # Multi-stage Docker build
 ```
 
 ## gRPC API
@@ -129,10 +126,10 @@ No automated testing framework is currently configured. The project does not inc
 
 ## Development
 
-- **Build Tool:** Maven (primary), Ant (legacy)
+- **Build Tool:** Gradle (Kotlin DSL)
 - **Java Level:** Java 21
 - **Look & Feel:** FlatLaf Light theme
-- **Proto code generation:** `protobuf-maven-plugin` generates Java stubs from `rssani.proto` at compile time
+- **Proto code generation:** `protobuf-gradle-plugin` generates Java stubs from `rssani.proto` at compile time
 
 ## Migration from XML-RPC (v0.7.x → v0.8.0)
 
