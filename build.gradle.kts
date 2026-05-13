@@ -40,11 +40,11 @@ sourceSets {
             srcDir(layout.buildDirectory.dir("generated/source/proto/main/grpc"))
         }
         resources {
-            srcDir("src/rax2")
+            srcDir("src")
+            include("rax2/resources/**/*.png")
+            include("rax2/resources/**/*.properties")
+            include("rax2/resources/**/*.xml")
             srcDir("src/main/proto")
-            include("**/*.png")
-            include("**/*.properties")
-            include("**/*.xml")
             include("**/*.proto")
         }
         proto {
