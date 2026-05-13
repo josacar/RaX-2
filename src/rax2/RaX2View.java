@@ -686,6 +686,7 @@ public class RaX2View extends javax.swing.JFrame {
             }
         });
 
+        jButtonAddServer = new javax.swing.JButton();
         jButtonAddServer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_add.png"))); // NOI18N
         jButtonAddServer.setText("Server"); // NOI18N
         jButtonAddServer.setMnemonic(java.awt.event.KeyEvent.VK_S);
