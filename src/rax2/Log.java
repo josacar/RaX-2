@@ -197,8 +197,8 @@ public class Log extends javax.swing.JFrame {
                 "Date", "Title"
             }) {
 
-                public Class getColumnClass(int column) {
-                    Class returnValue;
+                public Class<?> getColumnClass(int column) {
+                    Class<?> returnValue;
                     if ((column >= 0) && (column < getColumnCount())) {
                         returnValue = getValueAt(0, column).getClass();
                     } else {

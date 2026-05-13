@@ -80,7 +80,7 @@ public class Trackers extends javax.swing.JFrame {
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
         model=new DefaultTableModel(){
-            public Class getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(int columnIndex) {
                 if (columnIndex==0){
                     return String.class;
                 }else if (columnIndex==1){

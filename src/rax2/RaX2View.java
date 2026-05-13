@@ -14,7 +14,8 @@ import java.awt.SystemTray;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileInputStream;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -84,7 +85,7 @@ public class RaX2View extends javax.swing.JFrame {
     /** Log viewer dialog instance. */
     Log log;
     /** List of authenticated tracker names. */
-    Vector <String>trackers;
+    List<String> trackers;
     /** System tray icon. */
     TrayIcon trayIcon;
 
@@ -200,7 +201,6 @@ public class RaX2View extends javax.swing.JFrame {
 
     }
 
-    @SuppressWarnings("unchecked")
     /**
      * Creates new main application frame.
      * Initializes gRPC channel, loads saved hosts from preferences,
@@ -362,12 +362,12 @@ public class RaX2View extends javax.swing.JFrame {
 
             // Obtenemos el ultimo get del RSS
             StringResponse result3 = stub.verUltimo(empty);
-            String valores[] = result3.getValue().split(" ");
+            String[] valores = result3.getValue().split(" ");
             jLabelUltimoFecha.setText(valores[0]);
             jLabelUltimoHora.setText(valores[1]);
 
             // Obtenemos el item para ver si estaba en la lista
-            String item = (String) jComboBoxIP.getEditor().getItem();
+            String item = jComboBoxIP.getEditor().getItem().toString();
             boolean encontrado = false;
 
             // Miramos si el elemento estaba ya en la lista
@@ -380,7 +380,7 @@ public class RaX2View extends javax.swing.JFrame {
 
             // Si no estaba lo añadimos al combo y lo guardamos
             if (!encontrado) {
-                jComboBoxIP.addItem(jComboBoxIP.getEditor().getItem());
+                jComboBoxIP.addItem((String) jComboBoxIP.getEditor().getItem());
                 items++;
                 propiedades.putInt("items", items);
                 propiedades.put("item" + items, jComboBoxIP.getEditor().getItem().toString());
@@ -430,7 +430,7 @@ public class RaX2View extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jTextFieldPort = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jComboBoxIP = new javax.swing.JComboBox();
+        jComboBoxIP = new javax.swing.JComboBox<String>();
         jButtonAdd = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jButtonKill = new javax.swing.JButton();
@@ -571,7 +571,7 @@ public class RaX2View extends javax.swing.JFrame {
 
         //model = new DefaultTableModel();
         model=new DefaultTableModel(){
-            public Class getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(int columnIndex) {
                 if (columnIndex==0){
                     return String.class;
                 }else if (columnIndex==1){
@@ -1072,7 +1072,7 @@ private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {/
         return;
     }
 
-    String host = (String) jComboBoxIP.getSelectedItem();
+    String host = jComboBoxIP.getSelectedItem().toString();
 
     // Borramos la CFG y el item del combo
     if (host != null) {
@@ -1128,7 +1128,7 @@ private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//G
     /** Move expression up button. */
     private javax.swing.JButton jButtonUp;
     /** Host selection combo box. */
-    private javax.swing.JComboBox jComboBoxIP;
+    private javax.swing.JComboBox<String> jComboBoxIP;
     /** IP label. */
     private javax.swing.JLabel jLabel1;
     /** IP label (second). */
@@ -1174,7 +1174,7 @@ private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//G
     private void refreshTrackers() throws StatusRuntimeException {
         EmptyRequest empty = EmptyRequest.newBuilder().build();
         AuthListResponse result4 = stub.listaAuths(empty);
-        trackers = new Vector<String>();
+        trackers = new ArrayList<String>();
         for (int i = 0; i < result4.getEntriesCount(); ++i) {
             var entry = result4.getEntries(i);
             TrackerAuth auth = new TrackerAuth(

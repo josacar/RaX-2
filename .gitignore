@@ -5,10 +5,15 @@
 !gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
-/nbproject/private/
+
+# Build output #
 /build/
 /dist/
 /target
+
+# Gradle #
+/.gradle/
+
+# Misc #
 *.orig
 /.qwen
-/.gradle/

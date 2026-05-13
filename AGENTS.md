@@ -93,9 +93,4 @@ Runtime settings use the Java Preferences API (`java.util.prefs.Preferences`). H
 
 ### NetBeans
 
-The project was originally a NetBeans Ant project, then migrated to Maven, and is now a Gradle project. The `.form` files for Matisse GUI builder are no longer present — the Swing UI is pure Java code.
-
-### Known Issues
-
-- `RaX2App.main()` creates two instances of `RaX2App` (one is unused)
-- `NewJFrame.java` appears to be an unused/splash JFrame template
+The project was originally a NetBeans Ant project, then migrated to Maven, and is now a Gradle project. The Swing UI is pure Java code.
