@@ -19,8 +19,8 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Build with Maven
-        run: mvn package -B -V
+      - name: Build with Gradle
+        run: ./gradlew build -x test
 
       - name: Build Docker image
         run: docker build -t rax2 .
