@@ -43,7 +43,9 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.MetadataUtils;
 import rax2.proto.RssaniServiceGrpc;
 import rax2.proto.EmptyRequest;
 import rax2.proto.RegexpListResponse;
@@ -321,7 +323,17 @@ public class RaX2View extends javax.swing.JFrame {
             channel = ManagedChannelBuilder.forAddress(host, port)
                     .usePlaintext()
                     .build();
+
+            String user = propiedades.get("rpcUser" + host, "");
+            String pass = propiedades.get("rpcPass" + host, "");
+
             stub = RssaniServiceGrpc.newBlockingStub(channel);
+            if (!user.isEmpty() || !pass.isEmpty()) {
+                Metadata metadata = new Metadata();
+                metadata.put(Metadata.Key.of("rpcUser", Metadata.ASCII_STRING_MARSHALLER), user);
+                metadata.put(Metadata.Key.of("rpcPass", Metadata.ASCII_STRING_MARSHALLER), pass);
+                stub = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+            }
 
             EmptyRequest empty = EmptyRequest.getDefaultInstance();
 
@@ -674,6 +686,17 @@ public class RaX2View extends javax.swing.JFrame {
             }
         });
 
+        jButtonAddServer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_add.png"))); // NOI18N
+        jButtonAddServer.setText("Server"); // NOI18N
+        jButtonAddServer.setMnemonic(java.awt.event.KeyEvent.VK_S);
+        jButtonAddServer.setToolTipText("Add or configure server connection");
+        jButtonAddServer.setName("jButtonAddServer"); // NOI18N
+        jButtonAddServer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddServerActionPerformed(evt);
+            }
+        });
+
         jButtonTrackers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/configure.png"))); // NOI18N
         jButtonTrackers.setText("Trackers"); // NOI18N
         jButtonTrackers.setMnemonic(java.awt.event.KeyEvent.VK_T);
@@ -721,6 +744,8 @@ public class RaX2View extends javax.swing.JFrame {
                         .addComponent(jToggleButtonConnect)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonBorrarHost, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonAddServer)
                         .addGap(26, 26, 26)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -739,6 +764,7 @@ public class RaX2View extends javax.swing.JFrame {
                         .addComponent(jLabel3)
                         .addComponent(jLabel2))
                     .addComponent(jButtonBorrarHost, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonAddServer, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextFieldFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel5)))
@@ -1112,6 +1138,15 @@ private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {/
     items = jComboBoxIP.getModel().getSize();
 }//GEN-LAST:event_jButtonBorrarHostActionPerformed
 
+private void jButtonAddServerActionPerformed(java.awt.event.ActionEvent evt) {
+        AddServerDialog dialog = new AddServerDialog(this, propiedades, jComboBoxIP, jTextFieldPort);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        if (dialog.isConfirmed()) {
+            jTextFieldPort.setText(dialog.getPort());
+        }
+    }
+
 private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTrackersActionPerformed
     Trackers trk = new Trackers(this, stub);
     trk.setLocationRelativeTo(this);
@@ -1127,6 +1162,8 @@ private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton jButtonAdd;
     /** Delete host button. */
     private javax.swing.JButton jButtonBorrarHost;
+    /** Add server button. */
+    private javax.swing.JButton jButtonAddServer;
     /** Move expression down button. */
     private javax.swing.JButton jButtonDown;
     /** Kill/disconnect button. */

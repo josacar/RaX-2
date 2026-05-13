@@ -27,15 +27,17 @@ public class Opciones extends javax.swing.JDialog {
     }
 
     private void iniciaValores() {
-        try {
-            EmptyRequest empty = EmptyRequest.getDefaultInstance();
-            OpcionesResponse options = _stub.verOpciones(empty);
+        if (_stub != null) {
+            try {
+                EmptyRequest empty = EmptyRequest.getDefaultInstance();
+                OpcionesResponse options = _stub.verOpciones(empty);
 
-            jTextFieldMailFrom.setText(options.getFromMail());
-            jTextFieldMailTo.setText(options.getToMail());
-            jTextFieldRuta.setText(options.getPath());
-        } catch (StatusRuntimeException ex) {
-            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
+                jTextFieldMailFrom.setText(options.getFromMail());
+                jTextFieldMailTo.setText(options.getToMail());
+                jTextFieldRuta.setText(options.getPath());
+            } catch (StatusRuntimeException ex) {
+                GrpcErrorHandler.showErrorMessage(this, ex, "Error");
+            }
         }
         String user = _opciones.get("rpcUser" + _host, "");
         if (!user.equals("")) {
