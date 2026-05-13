@@ -1,9 +1,9 @@
 package rax2;
 
 import io.grpc.StatusRuntimeException;
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -45,47 +45,50 @@ final class GrpcErrorHandler {
     }
 
     private static void showError(Component parent, String title, String message, Throwable ex) {
+        String safeMsg = message != null ? message : ex.getClass().getSimpleName();
+
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JLabel msgLabel = new JLabel("<html><b>" + escapeHtml(message) + "</b></html>");
+        JLabel msgLabel = new JLabel("<html><b>" + escapeHtml(safeMsg) + "</b></html>");
         msgLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(msgLabel);
 
-        panel.add(Box.createVerticalStrut(12));
+        panel.add(Box.createVerticalStrut(10));
 
-        JTextArea detailsArea = new JTextArea();
-        detailsArea.setEditable(false);
-        detailsArea.setTabSize(2);
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));
-        detailsArea.setText(sw.toString());
+        JTextArea detailsArea = new JTextArea(sw.toString());
+        detailsArea.setEditable(false);
+        detailsArea.setTabSize(2);
 
         JScrollPane scrollPane = new JScrollPane(detailsArea);
         scrollPane.setPreferredSize(new Dimension(520, 180));
-        scrollPane.setVisible(false);
+        scrollPane.setMinimumSize(new Dimension(520, 180));
 
         JButton toggleButton = new JButton("Show Details \u25BC");
         toggleButton.addActionListener((ActionEvent e) -> {
-            boolean visible = !scrollPane.isVisible();
-            scrollPane.setVisible(visible);
-            toggleButton.setText(visible ? "Hide Details \u25B2" : "Show Details \u25BC");
-            toggleButton.revalidate();
-            toggleButton.repaint();
-            // Force parent dialog to resize
-            Component top = panel.getTopLevelAncestor();
-            if (top instanceof javax.swing.JDialog) {
-                ((javax.swing.JDialog) top).pack();
-            } else if (top instanceof javax.swing.JFrame) {
-                ((javax.swing.JFrame) top).pack();
+            boolean added = toggleButton.getClientProperty("detailsShown") == Boolean.TRUE;
+            if (!added) {
+                panel.add(scrollPane);
+                toggleButton.putClientProperty("detailsShown", Boolean.TRUE);
+                toggleButton.setText("Hide Details \u25B2");
+            } else {
+                panel.remove(scrollPane);
+                toggleButton.putClientProperty("detailsShown", Boolean.FALSE);
+                toggleButton.setText("Show Details \u25BC");
+            }
+            panel.revalidate();
+            panel.repaint();
+            Window w = javax.swing.SwingUtilities.getWindowAncestor(panel);
+            if (w != null) {
+                w.pack();
             }
         });
         toggleButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        toggleButton.setBackground(null);
-        toggleButton.setBorderPainted(false);
+        toggleButton.putClientProperty("detailsShown", Boolean.FALSE);
 
         panel.add(toggleButton);
-        panel.add(scrollPane);
 
         JOptionPane.showMessageDialog(parent, panel, title, JOptionPane.ERROR_MESSAGE);
     }
