@@ -27,7 +27,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=builder /app/build/libs/RaX2.jar /app/RaX2.jar
-COPY --from=builder /app/build/lib/ /app/lib/
+COPY --from=builder /app/build/libs/RaX2-all.jar /app/RaX2.jar
 
 CMD ["java", "-jar", "/app/RaX2.jar"]

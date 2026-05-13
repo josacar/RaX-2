@@ -2,6 +2,7 @@ plugins {
     java
     application
     id("com.google.protobuf") version "0.9.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "rax2"
@@ -74,6 +75,12 @@ tasks.processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.shadowJar {
+    archiveBaseName.set("RaX2")
+    archiveVersion.set("")
+    mergeServiceFiles()
+}
+
 tasks.jar {
     archiveBaseName.set("RaX2")
     archiveVersion.set("")
@@ -93,4 +100,5 @@ tasks.register<Copy>("copyDependencies") {
 
 tasks.assemble {
     dependsOn("copyDependencies")
+    dependsOn("shadowJar")
 }

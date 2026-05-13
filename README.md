@@ -35,7 +35,7 @@ RaX-2 is a Swing-based desktop client that provides a graphical interface for ma
 ./gradlew clean build -x test
 
 # Run the application
-java -jar build/libs/RaX2.jar
+java -jar build/libs/RaX2-all.jar
 ```
 
 ### Using Docker / Podman
@@ -59,7 +59,7 @@ podman run --rm \
 ## Running
 
 ```bash
-java -jar build/libs/RaX2.jar
+java -jar build/libs/RaX2-all.jar
 ```
 
 ## Configuration

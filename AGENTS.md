@@ -30,10 +30,10 @@ podman run --rm \
 ./gradlew clean build -x test
 
 # Run the application
-java -jar build/libs/RaX2.jar
+java -jar build/libs/RaX2-all.jar
 ```
 
-**Output:** `build/libs/RaX2.jar` (with dependencies in `build/lib/`)
+**Output:** `build/libs/RaX2-all.jar` (self-contained fat JAR with all dependencies)
 
 ## Testing
 
