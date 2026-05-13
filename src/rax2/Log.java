@@ -1,8 +1,3 @@
-/*
- * Log.java
- *
- * Created on 12 de abril de 2008, 14:03
- */
 package rax2;
 
 import java.awt.Component;
@@ -33,12 +28,7 @@ import rax2.proto.RssaniServiceGrpc;
 import rax2.proto.LogRequest;
 import rax2.proto.LogResponse;
 
-/**
- * Log viewer dialog that displays paginated log entries from the rssani server.
- * @author Usuario
- */
 class DateRenderer extends DefaultTableCellRenderer {
-    /* Clase que renderiza la fecha en la tabla del log */
 
     @Override
     public Component getTableCellRendererComponent(
@@ -56,13 +46,9 @@ class DateRenderer extends DefaultTableCellRenderer {
     }
 }
 
-/**
- * Log viewer dialog for displaying server log entries in a table with filtering.
- */
-public class Log extends javax.swing.JFrame {
+public class Log extends javax.swing.JDialog {
 
     class MyAdjustmentListener implements AdjustmentListener {
-        // Clase que imlementa el cambio de la scrollbar vertical
 
         JScrollBar verticalScrollBar;
 
@@ -73,15 +59,14 @@ public class Log extends javax.swing.JFrame {
         @Override
         public void adjustmentValueChanged(AdjustmentEvent e) {
             String aux;
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"); //Las M en mayúsculas o interpretará minutos!!
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
             DefaultTableModel model = (DefaultTableModel) getJTable1().getModel();
-            // Solo cuando sea el maximo de la scroll o maximicemos
             if (e.getValue() == (verticalScrollBar.getMaximum() - verticalScrollBar.getVisibleAmount()) || verticalScrollBar.getMaximum() == verticalScrollBar.getVisibleAmount()) {
                 if (max == e.getValue() && verticalScrollBar.getMaximum() != verticalScrollBar.getVisibleAmount()) {
-                    return; // Para que volver a llamar
+                    return;
                 }
-                try { // Llamada al gRPC y añadimos al final
+                try {
                     LogRequest request = LogRequest.newBuilder()
                             .setIni(offset)
                             .setFin(offset + 20)
@@ -97,27 +82,19 @@ public class Log extends javax.swing.JFrame {
                 } catch (ParseException ex) {
                     Logger.getLogger(RaX2View.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (StatusRuntimeException ex) {
-                    GrpcErrorHandler.showErrorMessage(null, ex, "Error");
+                    GrpcErrorHandler.showErrorMessage(Log.this, ex, "Error");
                 }
             }
         }
     }
-    /** Vertical scroll bar for the log table. */
     JScrollBar verticalScrollBar;
-    /** Horizontal scroll bar for the log table. */
     JScrollBar horizontalScrollBar;
-    /** gRPC stub for server communication. */
     private RssaniServiceGrpc.RssaniServiceBlockingStub _stub;
-    /** Number of log entries to fetch per page. */
     int offset = 20;
-    /** Maximum scroll position tracked. */
     int max = 0;
 
-    /**
-     * Creates new form Log.
-     * @param stub the gRPC blocking stub for server communication
-     */
-    public Log(RssaniServiceGrpc.RssaniServiceBlockingStub stub) {
+    public Log(java.awt.Frame parent, RssaniServiceGrpc.RssaniServiceBlockingStub stub) {
+        super(parent, true);
         initComponents();
         _stub = stub;
         verticalScrollBar = jScrollPaneLog.getVerticalScrollBar();
@@ -134,7 +111,7 @@ public class Log extends javax.swing.JFrame {
             java.awt.EventQueue.invokeLater(new Runnable() {
 
                 DefaultTableModel model;
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss"); //Las M en mayúsculas o interpretará minutos!!
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
                 @Override
                 synchronized public void run() {
@@ -145,7 +122,6 @@ public class Log extends javax.swing.JFrame {
 
                     for (int i = 0; i < result.getLinesCount(); ++i) {
                         try {
-                            //log.getJTextAreaLog().setCaretPosition(0);
                             aux = result.getLines(i);
                             java.util.Date fecha = sdf.parse(aux.split("[|]")[0].substring(2));
                             model.addRow(new Object[]{fecha, aux.split("[|]")[1]});
@@ -153,43 +129,29 @@ public class Log extends javax.swing.JFrame {
                             Logger.getLogger(RaX2View.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                    // Inicializamos los valores
                     offset = 20;
                     max = 0;
                 }
             });
 
         } catch (StatusRuntimeException ex) {
-            GrpcErrorHandler.showErrorMessage(null, ex, "Error");
+            GrpcErrorHandler.showErrorMessage(this, ex, "Error");
         }
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
-     */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
         jScrollPaneLog = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jTextFieldFiltro = new javax.swing.JTextField();
 
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        jTree1.setName("jTree1"); // NOI18N
-        jScrollPane1.setViewportView(jTree1);
-
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Log"); // NOI18N
-        setName("Form"); // NOI18N
+        setTitle("Log");
+        setName("Form");
 
-        jScrollPaneLog.setName("jScrollPaneLog"); // NOI18N
+        jScrollPaneLog.setName("jScrollPaneLog");
 
         jTable1.setModel(new DefaultTableModel(
             new Object[][]{},
@@ -211,17 +173,20 @@ public class Log extends javax.swing.JFrame {
                     return false;
                 }
             });
-            jTable1.setName("jTable1"); // NOI18N
+            jTable1.setName("jTable1");
+            jTable1.setToolTipText("Server log entries");
             sorter = new TableRowSorter<TableModel>(jTable1.getModel());
             jTable1.setRowSorter(sorter);
-            jTable1.setDefaultRenderer(Date.class, new DateRenderer() );
+            jTable1.setDefaultRenderer(Date.class, new DateRenderer());
             jScrollPaneLog.setViewportView(jTable1);
 
-            jLabel1.setText("Filter:"); // NOI18N
-            jLabel1.setName("jLabel1"); // NOI18N
+            jLabel1.setLabelFor(jTextFieldFiltro);
+            jLabel1.setText("Filter:");
+            jLabel1.setName("jLabel1");
 
-            jTextFieldFiltro.setText(""); // NOI18N
-            jTextFieldFiltro.setName("jTextFieldFiltro"); // NOI18N
+            jTextFieldFiltro.setText("");
+            jTextFieldFiltro.setName("jTextFieldFiltro");
+            jTextFieldFiltro.setToolTipText("Type to filter log entries by text or regex");
 
             javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
             getContentPane().setLayout(layout);
@@ -273,53 +238,26 @@ public class Log extends javax.swing.JFrame {
             });
 
             pack();
-        }// </editor-fold>//GEN-END:initComponents
+        }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    /** Filter label. */
     private javax.swing.JLabel jLabel1;
-    /** Unused scroll pane (legacy). */
-    private javax.swing.JScrollPane jScrollPane1;
-    /** Scroll pane for the log table. */
     private javax.swing.JScrollPane jScrollPaneLog;
-    /** Log entries table. */
     private javax.swing.JTable jTable1;
-    /** Table row sorter for filtering. */
     private TableRowSorter<TableModel> sorter;
-    /** Text field for filtering log entries. */
     private javax.swing.JTextField jTextFieldFiltro;
-    /** Unused tree component (legacy). */
-    private javax.swing.JTree jTree1;
-    // End of variables declaration//GEN-END:variables
 
-    /**
-     * Returns the scroll pane containing the log table.
-     * @return the log scroll pane
-     */
     public JScrollPane getJScrollPaneLog() {
         return jScrollPaneLog;
     }
 
-    /**
-     * Sets the scroll pane containing the log table.
-     * @param jScrollPaneLog the log scroll pane
-     */
     public void setJScrollPaneLog(JScrollPane jScrollPaneLog) {
         this.jScrollPaneLog = jScrollPaneLog;
     }
 
-    /**
-     * Returns the log table.
-     * @return the log table
-     */
     public JTable getJTable1() {
         return jTable1;
     }
 
-    /**
-     * Sets the log table.
-     * @param jTable1 the log table
-     */
     public void setJTable1(JTable jTable1) {
         this.jTable1 = jTable1;
     }

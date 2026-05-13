@@ -13,25 +13,8 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
-import rax2.proto.RssaniServiceGrpc;
-import rax2.proto.EmptyRequest;
-import rax2.proto.RegexpListResponse;
-import rax2.proto.IntResponse;
-import rax2.proto.StringResponse;
-import rax2.proto.AuthListResponse;
-import rax2.proto.BoolResponse;
-import rax2.proto.AnadirRegexpRequest;
-import rax2.proto.EditarRegexpIRequest;
-import rax2.proto.ActivarRegexpRequest;
-import rax2.proto.MoverRegexpRequest;
-import rax2.proto.BorrarRegexpSRequest;
 import java.util.prefs.Preferences;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.DefaultCellEditor;
@@ -49,16 +32,30 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
+import rax2.proto.RssaniServiceGrpc;
+import rax2.proto.EmptyRequest;
+import rax2.proto.RegexpListResponse;
+import rax2.proto.IntResponse;
+import rax2.proto.StringResponse;
+import rax2.proto.AuthListResponse;
+import rax2.proto.BoolResponse;
+import rax2.proto.AnadirRegexpRequest;
+import rax2.proto.EditarRegexpIRequest;
+import rax2.proto.ActivarRegexpRequest;
+import rax2.proto.MoverRegexpRequest;
+import rax2.proto.BorrarRegexpSRequest;
 
 /**
  * Main application window for RaX-2. Provides a GUI for managing RSS expressions,
@@ -72,16 +69,12 @@ public class RaX2View extends javax.swing.JFrame {
     RssaniServiceGrpc.RssaniServiceBlockingStub stub;
     /** Preferences store for local settings. */
     Preferences propiedades;
-    /** Unused configuration filename constant. */
-    String FICHERO_CONFIGURACION = "Configuracion.properties";
     /** Number of hosts stored in preferences. */
     int items;
-    /** Auxiliary string for building preference keys. */
-    String auxitem;
     /** Table model for RSS expressions. */
     DefaultTableModel model;
     /** Application version string. */
-    String version = "0.7.1";
+    String version = "0.8.0";
     /** Log viewer dialog instance. */
     Log log;
     /** List of authenticated tracker names. */
@@ -211,7 +204,6 @@ public class RaX2View extends javax.swing.JFrame {
         this.setTitle(getTitle() + ' ' + version);
         this.setMinimumSize(new Dimension(600, 470));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        FileInputStream f = null;
         channel = ManagedChannelBuilder.forTarget("localhost:50051")
                 .usePlaintext()
                 .build();
@@ -235,7 +227,6 @@ public class RaX2View extends javax.swing.JFrame {
         jComboBoxIP.setSelectedItem(propiedades.get("lastItem", ""));
 
         crearBandeja();
-        this.addWindowListener(new MyWindowListener());
         this.addWindowListener(new MyWindowListener());
 
         creaPopup();
@@ -456,17 +447,23 @@ public class RaX2View extends javax.swing.JFrame {
 
         mainPanel.setName("mainPanel"); // NOI18N
 
+        jLabel2.setLabelFor(jComboBoxIP);
         jLabel2.setText("IP"); // NOI18N
+        jLabel2.setDisplayedMnemonic(java.awt.event.KeyEvent.VK_I);
         jLabel2.setName("jLabel2"); // NOI18N
 
         jTextFieldPort.setText("50051"); // NOI18N
+        jTextFieldPort.setToolTipText("Server port number (default: 50051)");
         jTextFieldPort.setName("jTextFieldPort"); // NOI18N
 
+        jLabel3.setLabelFor(jTextFieldPort);
         jLabel3.setText("Port"); // NOI18N
+        jLabel3.setDisplayedMnemonic(java.awt.event.KeyEvent.VK_P);
         jLabel3.setName("jLabel3"); // NOI18N
 
         jComboBoxIP.setEditable(true);
         jComboBoxIP.setName("jComboBoxIP"); // NOI18N
+        jComboBoxIP.setToolTipText("Server hostname or IP address");
         jComboBoxIP.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBoxIPActionPerformed(evt);
@@ -475,6 +472,8 @@ public class RaX2View extends javax.swing.JFrame {
 
         jButtonAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_add.png"))); // NOI18N
         jButtonAdd.setText("Add"); // NOI18N
+        jButtonAdd.setMnemonic(java.awt.event.KeyEvent.VK_A);
+        jButtonAdd.setToolTipText("Add a new RSS expression");
         jButtonAdd.setEnabled(false);
         jButtonAdd.setMaximumSize(new java.awt.Dimension(77, 26));
         jButtonAdd.setMinimumSize(new java.awt.Dimension(77, 26));
@@ -490,6 +489,8 @@ public class RaX2View extends javax.swing.JFrame {
 
         jButtonKill.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/cancel.png"))); // NOI18N
         jButtonKill.setText("Kill"); // NOI18N
+        jButtonKill.setMnemonic(java.awt.event.KeyEvent.VK_K);
+        jButtonKill.setToolTipText("Stop the rssani server process");
         jButtonKill.setEnabled(false);
         jButtonKill.setName("jButtonKill"); // NOI18N
         jButtonKill.addActionListener(new java.awt.event.ActionListener() {
@@ -514,6 +515,8 @@ public class RaX2View extends javax.swing.JFrame {
 
         jButtonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/filesave.png"))); // NOI18N
         jButtonSave.setText("Save"); // NOI18N
+        jButtonSave.setMnemonic(java.awt.event.KeyEvent.VK_S);
+        jButtonSave.setToolTipText("Save expressions to server");
         jButtonSave.setEnabled(false);
         jButtonSave.setName("jButtonSave"); // NOI18N
         jButtonSave.addActionListener(new java.awt.event.ActionListener() {
@@ -559,6 +562,8 @@ public class RaX2View extends javax.swing.JFrame {
 
         jButtonLog.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/openterm.png"))); // NOI18N
         jButtonLog.setText("Log"); // NOI18N
+        jButtonLog.setMnemonic(java.awt.event.KeyEvent.VK_L);
+        jButtonLog.setToolTipText("Open server log viewer");
         jButtonLog.setEnabled(false);
         jButtonLog.setName("jButtonLog"); // NOI18N
         jButtonLog.addActionListener(new java.awt.event.ActionListener() {
@@ -609,12 +614,15 @@ public class RaX2View extends javax.swing.JFrame {
         jTable1.setAlignmentY(1.0F);
         jTable1.setAutoscrolls(false);
         jTable1.setName("jTable1"); // NOI18N
+        jTable1.setToolTipText("Right-click for options");
         jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jTable1.setShowVerticalLines(false);
         jScrollPane1.setViewportView(jTable1);
 
         jButtonOpciones.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/configure.png"))); // NOI18N
         jButtonOpciones.setText("Settings"); // NOI18N
+        jButtonOpciones.setMnemonic(java.awt.event.KeyEvent.VK_E);
+        jButtonOpciones.setToolTipText("Open server settings");
         jButtonOpciones.setName("jButtonOpciones"); // NOI18N
         jButtonOpciones.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -639,6 +647,7 @@ public class RaX2View extends javax.swing.JFrame {
 
         jToggleButtonConnect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/connect_creating.png"))); // NOI18N
         jToggleButtonConnect.setText("Connect"); // NOI18N
+        jToggleButtonConnect.setToolTipText("Connect to or disconnect from the rssani server");
         jToggleButtonConnect.setName("jToggleButtonConnect"); // NOI18N
         jToggleButtonConnect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -646,14 +655,18 @@ public class RaX2View extends javax.swing.JFrame {
             }
         });
 
+        jLabel5.setLabelFor(jTextFieldFiltro);
         jLabel5.setText("Filter:"); // NOI18N
+        jLabel5.setDisplayedMnemonic(java.awt.event.KeyEvent.VK_F);
         jLabel5.setName("jLabel5"); // NOI18N
 
         jTextFieldFiltro.setEditable(false);
+        jTextFieldFiltro.setToolTipText("Type to filter expressions by regex");
         jTextFieldFiltro.setName("jTextFieldFiltro"); // NOI18N
 
         jButtonBorrarHost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/edit_remove.png"))); // NOI18N
         jButtonBorrarHost.setText("Delete"); // NOI18N
+        jButtonBorrarHost.setToolTipText("Delete saved host entry");
         jButtonBorrarHost.setName("jButtonBorrarHost"); // NOI18N
         jButtonBorrarHost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -663,6 +676,8 @@ public class RaX2View extends javax.swing.JFrame {
 
         jButtonTrackers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rax2/resources/configure.png"))); // NOI18N
         jButtonTrackers.setText("Trackers"); // NOI18N
+        jButtonTrackers.setMnemonic(java.awt.event.KeyEvent.VK_T);
+        jButtonTrackers.setToolTipText("Manage tracker authentication");
         jButtonTrackers.setEnabled(false);
         jButtonTrackers.setName("jButtonTrackers"); // NOI18N
         jButtonTrackers.addActionListener(new java.awt.event.ActionListener() {
@@ -838,7 +853,7 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Dialogo de edicion de la regexp
-        String cadDest = JOptionPane.showInputDialog("Enter the new RegExp", cadOrig);
+        String cadDest = JOptionPane.showInputDialog(this, "Enter the new RegExp", cadOrig);
         if (cadDest == null || cadDest.equals("")) {
             return;
         }
@@ -904,13 +919,13 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Dialogo para la nueva regexp
-        String cadena = JOptionPane.showInputDialog("Enter the RegExp to add");
+        String cadena = JOptionPane.showInputDialog(this, "Enter the RegExp to add");
         if (cadena == null || cadena.equals("")) {
             return;
         }
 
         // Dialogo para la fecha
-        String vencimiento = JOptionPane.showInputDialog("Enter the expiration date (dd-mm-yyyy)", "");
+        String vencimiento = JOptionPane.showInputDialog(this, "Enter the expiration date (dd-mm-yyyy)", "");
         if (vencimiento == null) {
             return;
         }
@@ -927,7 +942,7 @@ public class RaX2View extends javax.swing.JFrame {
         }
 
         // Dialogo para solo mail
-        String dias = JOptionPane.showInputDialog("Numero de dias entre descarga?",0);
+        String dias = JOptionPane.showInputDialog(this, "Number of days between downloads?", 0);
         if (dias == null) {
             return;
         }
@@ -1007,7 +1022,7 @@ public class RaX2View extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonDownActionPerformed
 
     private void jButtonLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLogActionPerformed
-        log = new Log(stub);
+        log = new Log(this, stub);
         log.setLocationRelativeTo(this);
         log.setVisible(true);
     }//GEN-LAST:event_jButtonLogActionPerformed
@@ -1043,9 +1058,8 @@ private void jButtonOpcionesActionPerformed(java.awt.event.ActionEvent evt) {//G
 
         @Override
         synchronized public void run() {
-            // Creo el dialogo de opciones con sus cosas
-            Opciones opc = new Opciones(propiedades, stub, jComboBoxIP.getSelectedItem().toString());
-            opc.setLocationRelativeTo(null);
+            Opciones opc = new Opciones(RaX2View.this, propiedades, stub, jComboBoxIP.getSelectedItem().toString());
+            opc.setLocationRelativeTo(RaX2View.this);
             opc.setVisible(true);
 
         }
@@ -1099,7 +1113,7 @@ private void jButtonBorrarHostActionPerformed(java.awt.event.ActionEvent evt) {/
 }//GEN-LAST:event_jButtonBorrarHostActionPerformed
 
 private void jButtonTrackersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTrackersActionPerformed
-    Trackers trk = new Trackers(stub);
+    Trackers trk = new Trackers(this, stub);
     trk.setLocationRelativeTo(this);
     trk.setVisible(true);
 }//GEN-LAST:event_jButtonTrackersActionPerformed
